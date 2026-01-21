@@ -24,6 +24,7 @@ export const Route = createFileRoute('/')({
 function App() {
   const navigate = useNavigate()
   const { data, isLoading } = useCheckAuthQuery()
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [registerOpen, setRegisterOpen] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const [formData, setFormData] = useState<TLoginUserData>({
@@ -41,16 +42,17 @@ function App() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-
-    console.log('Login:', formData)
+    setIsSubmitting(true)
 
     login.mutate(formData, {
       onSuccess: (data) => {
         console.log(data)
+        setIsSubmitting(false)
         navigate({ to: '/dashboard' })
       },
       onError: (err: any) => {
         if (err.response) {
+          setIsSubmitting(false)
           console.log(err.response?.data.error)
           setError(err.response?.data.error)
         }
@@ -107,7 +109,13 @@ function App() {
               />
             </div>
             <Button type="submit" className="w-full">
-              Login
+              {isSubmitting ? (
+                <div className="w-full min-h-screen flex justify-center items-center">
+                  <div className="loader-1"></div>
+                </div>
+              ) : (
+                'Login'
+              )}
             </Button>
             <div className="text-center text-sm">
               <span className="text-muted-foreground">

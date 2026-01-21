@@ -1,4 +1,12 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { AlertCircle, DollarSign, Package, } from 'lucide-react'
+import type { SaleWithDetails, StockAlert } from '@/@types'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   Table,
   TableBody,
@@ -8,8 +16,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { DollarSign, Package, AlertCircle } from 'lucide-react'
-import type { SaleWithDetails, StockAlert } from '@/@types'
 
 interface OverviewSectionProps {
   totalRevenue: number
@@ -17,8 +23,8 @@ interface OverviewSectionProps {
   totalProducts: number
   lowStockItems: number
   outOfStockItems: number
-  salesWithDetails: SaleWithDetails[]
-  stockAlerts: StockAlert[]
+  salesWithDetails: Array<SaleWithDetails>
+  stockAlerts?: Array<StockAlert>
 }
 
 export function OverviewSection({
@@ -40,29 +46,43 @@ export function OverviewSection({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              $
+              {totalRevenue.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </div>
-            <p className="text-xs text-muted-foreground">From {totalSales} sales</p>
+            <p className="text-xs text-muted-foreground">
+              From {totalSales} sales
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Products
+            </CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalProducts}</div>
-            <p className="text-xs text-muted-foreground">Products in inventory</p>
+            <p className="text-xs text-muted-foreground">
+              Products in inventory
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Low Stock Items
+            </CardTitle>
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{lowStockItems}</div>
-            <p className="text-xs text-muted-foreground">Items need restocking</p>
+            <p className="text-xs text-muted-foreground">
+              Items need restocking
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -71,7 +91,9 @@ export function OverviewSection({
             <AlertCircle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">{outOfStockItems}</div>
+            <div className="text-2xl font-bold text-destructive">
+              {outOfStockItems}
+            </div>
             <p className="text-xs text-muted-foreground">Items unavailable</p>
           </CardContent>
         </Card>
@@ -116,16 +138,23 @@ export function OverviewSection({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {stockAlerts.map((alert) => (
-                <div key={alert.Id} className="flex items-center justify-between">
+              {stockAlerts?.map((alert) => (
+                <div
+                  key={alert.id}
+                  className="flex items-center justify-between"
+                >
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">{alert.ProductName}</p>
+                    <p className="text-sm font-medium">{alert.productName}</p>
                     <p className="text-xs text-muted-foreground">
-                      Current: {alert.Current} | Min: {alert.Min}
+                      Current: {alert.current} | Min: {alert.min}
                     </p>
                   </div>
-                  <Badge variant={alert.Status === 'Out' ? 'destructive' : 'secondary'}>
-                    {alert.Status}
+                  <Badge
+                    variant={
+                      alert.status === 'Out' ? 'destructive' : 'secondary'
+                    }
+                  >
+                    {alert.status}
                   </Badge>
                 </div>
               ))}

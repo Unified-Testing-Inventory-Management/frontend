@@ -8,7 +8,6 @@ export const useProducts = () => {
 
   useEffect(() => {
     setProducts(data?.data || [])
-    console.log('Fetched products:', data?.data)
   }, [data])
 
   return {

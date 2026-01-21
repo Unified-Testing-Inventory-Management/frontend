@@ -6,9 +6,34 @@ export const getAllProducts = async () => {
   return res.data
 }
 
+export const getProductById = async (id: string) => {
+  const res = await api.get(`/api/v1/products/${id}`)
+  return res.data
+}
+
 export const registerProduct = async (
-  data: Omit<Product, 'id' | 'createdAt' | 'lowStockLevel' | 'barCode'>,
+  data: Omit<Product, 'id' | 'createdAt' | 'barCode'>,
 ) => {
-  const res = await api.post('/api/v1/products', data)
+  const form = new FormData()
+  form.append("productName", data.productName)
+  form.append("category", data.category)
+  form.append("price", String(data.price))
+  form.append("stockQuantity", String(data.stockQuantity))
+  
+  if (data.image) {
+    form.append("image", data.image)
+  }
+
+  const res = await api.post('/api/v1/products', form)
+  return res.data
+}
+
+export const updateProduct = async (id: string) => {
+  const res = await api.patch(`/api/v1/products/${id}`)
+  return res.data
+}
+
+export const archiveProduct = async (id: string | number | null) => {
+  const res = await api.delete(`/api/v1/products/${id}`)
   return res.data
 }

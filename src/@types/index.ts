@@ -21,13 +21,13 @@ export type User = {
 
 // Type definitions for dashboard
 export type Product = {
-  id: number
+  id: string | number
+  image: File | null | string
   productName: string
   category: string
   price: number
-  stockQuantity: string
+  stockQuantity: number
   createdAt: string
-  lowStockLevel: number
   barCode: string
 }
 
@@ -64,7 +64,7 @@ export const getProductStatus = (
   product: Product,
 ): 'In Stock' | 'Low Stock' | 'Out of Stock' => {
   if (Number(product.stockQuantity) === 0) return 'Out of Stock'
-  if (Number(product.stockQuantity) <= product.lowStockLevel) return 'Low Stock'
+  if (Number(product.stockQuantity) <= 5) return 'Low Stock'
   return 'In Stock'
 }
 

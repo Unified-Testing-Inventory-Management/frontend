@@ -1,5 +1,6 @@
-import type { Product, Sale, SaleDetail } from '@/@types'
+import type { Product, SaleWithDetails, SaleDetail, Sale } from '@/@types'
 import { useAllProductsQuery } from '@/services/product_services'
+import { useAllProductSalesQuery } from '@/services/sale_services'
 import { useEffect, useState } from 'react'
 
 export const useProducts = () => {
@@ -16,6 +17,22 @@ export const useProducts = () => {
     error,
   }
 }
+
+export const useProductSales = () => {
+  const [sales, setSales] = useState<SaleWithDetails[] | []>([])
+  const { data, isLoading, error } = useAllProductSalesQuery();
+
+  useEffect(() => {
+    setSales(data?.data || [])
+  }, [data])
+
+  return {
+    sales,
+    isLoading,
+    error
+  }
+}
+
 
 export const sales: Sale[] = [
   { Id: 1, UserId: 1, SaleDate: '2024-01-15', TotalAmount: 1299.99 },

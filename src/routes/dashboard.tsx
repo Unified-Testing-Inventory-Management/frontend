@@ -38,13 +38,14 @@ import { ProductsSection } from '@/components/dashboard/ProductsSection'
 import { SalesSection } from '@/components/dashboard/SalesSection'
 import { StocksSection } from '@/components/dashboard/StocksSection'
 import { SettingsSection } from '@/components/dashboard/SettingsSection'
-import { sales, saleDetails } from '@/data/dashboard-data'
+import { saleDetails, useProductSales } from '@/data/dashboard-data'
 import { useProducts } from '@/data/dashboard-data'
 import { getStockAlertStatus } from '@/@types'
 import type { SaleWithDetails } from '@/@types'
 import { ProtectedRoute } from '@/middleware'
 import { useLogoutUserMutation, UserData } from '@/services/user_services'
 import { useQueryClient } from '@tanstack/react-query'
+import TransactionSection from '@/components/dashboard/TransactionSection'
 
 export const Route = createFileRoute('/dashboard')({
   component: () => (
@@ -64,6 +65,7 @@ function RouteComponent() {
   const logout = useLogoutUserMutation()
   const queryClient = useQueryClient()
   const { products } = useProducts()
+  const { sales } = useProductSales();
 
   const handleLogout = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -270,6 +272,10 @@ function RouteComponent() {
           )}
 
           {activeSection === 'settings' && <SettingsSection />}
+
+          {activeSection === 'transactions' && (
+            <TransactionSection products={products} />
+          )}
         </div>
       </SidebarInset>
     </SidebarProvider>

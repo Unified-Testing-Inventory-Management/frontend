@@ -1,4 +1,10 @@
-import { ArchiveIcon, CheckCircle2Icon, EditIcon, Plus } from 'lucide-react'
+import {
+  ArchiveIcon,
+  CheckCircle2Icon,
+  EditIcon,
+  PackageIcon,
+  Plus,
+} from 'lucide-react'
 import { Activity, useState } from 'react'
 import type { Product } from '@/@types'
 import {
@@ -180,65 +186,86 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                 </TableHeader>
 
                 <TableBody>
-                  {products.map((product) => {
-                    const status = getProductStatus(product)
-                    return (
-                      <TableRow key={product.id}>
-                        <TableCell>
-                          {product.image ? (
+                  {products.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={9}>
+                        <div className="flex flex-col h-120 items-center justify-center py-10 text-muted-foreground">
+                          <PackageIcon className="mb-3 h-10 w-10 text-gray-400" />
+                          <p className="text-base font-medium">
+                            No products found
+                          </p>
+                          <p className="text-sm">
+                            Click &quot;Add Product&quot; to create your first
+                            item.
+                          </p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    products.map((product) => {
+                      const status = getProductStatus(product)
+                      return (
+                        <TableRow key={product.id}>
+                          <TableCell>
+                            {product.image ? (
+                              <img
+                                className="w-12 h-12 object-cover rounded"
+                                src={
+                                  typeof product.image == 'string'
+                                    ? product.image
+                                    : ''
+                                }
+                                alt={product.productName || 'Product image'}
+                              />
+                            ) : (
+                              <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-500 text-xs">
+                                No Image
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>{product.productName}</TableCell>
+                          <TableCell>{product.category}</TableCell>
+                          <TableCell>
+                            &#8369; {product.price.toFixed(2)}
+                          </TableCell>
+                          <TableCell>{product.stockQuantity}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                status === 'In Stock'
+                                  ? 'default'
+                                  : status === 'Low Stock'
+                                    ? 'secondary'
+                                    : 'destructive'
+                              }
+                            >
+                              {status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
                             <img
                               className="w-12 h-12 object-cover rounded"
-                              src={typeof product.image == "string" ? product.image : ""}
-                              alt={product.productName || "Product image"}
+                              src={`data:image/png;base64,${product.barCode}`}
+                              alt="barcode img"
                             />
-                          ) : (
-                            <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-500 text-xs">
-                              No Image
+                          </TableCell>
+                          <TableCell>{product.createdAt}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-row gap-1.5">
+                              <EditIcon className="text-shadow-blue-500" />
+                              <ArchiveIcon
+                                onClick={() => {
+                                  setIsArchiveModalOpen(true)
+                                  setProductId(product.id)
+                                }}
+                                className="text-orange-500"
+                              />
                             </div>
-                          )}
-                        </TableCell>
-                        <TableCell>{product.productName}</TableCell>
-                        <TableCell>{product.category}</TableCell>
-                        <TableCell>
-                          &#8369; {product.price.toFixed(2)}
-                        </TableCell>
-                        <TableCell>{product.stockQuantity}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              status === 'In Stock'
-                                ? 'default'
-                                : status === 'Low Stock'
-                                  ? 'secondary'
-                                  : 'destructive'
-                            }
-                          >
-                            {status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <img
-                            className="w-12 h-12 object-cover rounded"
-                            src={`data:image/png;base64,${product.barCode}`}
-                            alt="barcode img"
-                          />
-                        </TableCell>
-                        <TableCell>{product.createdAt}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-row gap-1.5">
-                            <EditIcon className="text-shadow-blue-500" />
-                            <ArchiveIcon
-                              onClick={() => {
-                                setIsArchiveModalOpen(true)
-                                setProductId(product.id)
-                              }}
-                              className="text-orange-500"
-                            />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
+                  )}
                 </TableBody>
               </Table>
             </div>

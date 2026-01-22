@@ -106,7 +106,7 @@ export function OverviewSection({
             <CardDescription>Latest transactions</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
+            <Table className="h-70 overflow-y-scroll">
               <TableHeader>
                 <TableRow>
                   <TableHead>Product</TableHead>
@@ -137,7 +137,7 @@ export function OverviewSection({
             <CardDescription>Items requiring attention</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-4 h-70 overflow-auto">
               {stockAlerts?.map((alert) => (
                 <div
                   key={alert.id}

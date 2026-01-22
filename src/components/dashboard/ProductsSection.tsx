@@ -173,15 +173,9 @@ export function ProductsSection({ products }: ProductsSectionProps) {
               <Table className="w-full">
                 <TableHeader className="sticky top-0 bg-white z-10">
                   <TableRow>
-                    <TableHead>Image</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Stock</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>BarCode</TableHead>
-                    <TableHead>Created At</TableHead>
-                    <TableHead>Action</TableHead>
+                    {["Image","Name","Category","Price","Stock","Status","BarCode","Created At","Action"].map((item)=> (
+                    <TableHead key={item}>{item}</TableHead>
+                    ))}
                   </TableRow>
                 </TableHeader>
 
@@ -203,7 +197,6 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                             </div>
                           )}
                         </TableCell>
-
                         <TableCell>{product.productName}</TableCell>
                         <TableCell>{product.category}</TableCell>
                         <TableCell>

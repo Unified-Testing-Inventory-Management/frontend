@@ -56,7 +56,7 @@ export const Route = createFileRoute('/dashboard')({
 
 function RouteComponent() {
   const [activeSection, setActiveSection] = useState<
-    'overview' | 'products' | 'sales' | 'stocks' | 'settings'
+    'overview' | 'products' | 'sales' | 'stocks' | 'settings' | 'transactions'
   >('overview')
   const { open: sidebarOpen } = React.useContext(SidebarContext)
   const user = UserData()
@@ -120,7 +120,7 @@ function RouteComponent() {
     { icon: Package, label: 'Products', value: 'products' },
     { icon: ShoppingCart, label: 'Sales', value: 'sales' },
     { icon: TrendingUp, label: 'Stocks', value: 'stocks' },
-    { icon: Activity, label: 'Transactions', value: 'Transactions' },
+    { icon: Activity, label: 'Transactions', value: 'transactions' },
   ]
 
   return (
@@ -236,6 +236,7 @@ function RouteComponent() {
               {activeSection === 'sales' && 'Sales Overview'}
               {activeSection === 'stocks' && 'Stock Management'}
               {activeSection === 'settings' && 'My Account'}
+              {activeSection === 'transactions' && 'Transactions'}
             </h1>
           </div>
         </header>

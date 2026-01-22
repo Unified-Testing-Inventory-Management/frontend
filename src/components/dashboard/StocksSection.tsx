@@ -37,9 +37,7 @@ export function StocksSection({
             <CardTitle className="text-base">Total Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
-              {products.reduce((sum, p) => sum + Number(p.stockQuantity), 0)}
-            </div>
+            <div className="text-3xl font-bold">{products.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Items across all products
             </p>
@@ -102,14 +100,16 @@ export function StocksSection({
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <span>{product.stockQuantity}</span>
-                        {Number(product.stockQuantity) <= product.lowStockLevel &&
+                        {Number(product.stockQuantity) <=
+                          product.lowStockLevel &&
                           Number(product.stockQuantity) > 0 && (
                             <AlertCircle className="h-4 w-4 text-yellow-600" />
                           )}
                         {Number(product.stockQuantity) === 0 && (
                           <AlertCircle className="h-4 w-4 text-destructive" />
                         )}
-                        {Number(product.stockQuantity) > product.lowStockLevel && (
+                        {Number(product.stockQuantity) >
+                          product.lowStockLevel && (
                           <CheckCircle2 className="h-4 w-4 text-green-600" />
                         )}
                       </div>

@@ -1,3 +1,4 @@
+import { ShoppingCart } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
@@ -10,13 +11,14 @@ import {
 import type { SaleWithDetails } from '@/@types'
 
 interface SalesSectionProps {
-  salesWithDetails: SaleWithDetails[]
+  salesWithDetails: Array<SaleWithDetails>
 }
 
 export function SalesSection({ salesWithDetails }: SalesSectionProps) {
+
   return (
     <div className="space-y-4">
-      <Card>
+      <Card className='h-150'>
         <CardHeader>
           <CardTitle>Sales Overview</CardTitle>
           <CardDescription>Complete sales transaction history</CardDescription>
@@ -54,6 +56,18 @@ export function SalesSection({ salesWithDetails }: SalesSectionProps) {
               ))}
             </TableBody>
           </Table>
+          <div>
+            {salesWithDetails.length == 0 ? (
+              <div className="w-full h-90 mt-5 flex flex-col justify-center items-center gap-2 py-4">
+                <ShoppingCart className="h-8 w-8 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  Don't have sales right now.
+                </span>
+              </div>
+            ) : (
+              ''
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

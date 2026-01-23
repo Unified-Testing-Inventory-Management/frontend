@@ -41,7 +41,7 @@ import { SettingsSection } from '@/components/dashboard/SettingsSection'
 import { saleDetails, useProductSales } from '@/data/dashboard-data'
 import { useProducts } from '@/data/dashboard-data'
 import { getStockAlertStatus } from '@/@types'
-import type { SaleWithDetails } from '@/@types'
+import type { SaleWithDetails, StockAlert } from '@/@types'
 import { ProtectedRoute } from '@/middleware'
 import { useLogoutUserMutation, UserData } from '@/services/user_services'
 import { useQueryClient } from '@tanstack/react-query'
@@ -98,14 +98,16 @@ function RouteComponent() {
     }
   })
 
-  const stockAlerts = products
+  const stockAlerts: StockAlert[] = products
     .filter((p) => Number(p.stockQuantity) <= 10)
     .map((p) => ({
-      id: p.id,
+      id: Number(p.id),
       productName: p.productName,
-      current: p.stockQuantity,
+      current: Number(p.stockQuantity),
+      min: 10,
       status: getStockAlertStatus(p),
     }))
+
 
   const totalRevenue = sales.reduce((sum, sale) => sum + sale.TotalAmount, 0)
   const totalProducts = products.length

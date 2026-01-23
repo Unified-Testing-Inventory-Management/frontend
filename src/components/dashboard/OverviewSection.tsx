@@ -33,7 +33,7 @@ interface OverviewSectionProps {
   lowStockItems: number
   outOfStockItems: number
   salesWithDetails: Array<SaleWithDetails>
-  stockAlerts?: Array<StockAlert>
+  stockAlerts: Array<StockAlert>
 }
 
 export function OverviewSection({

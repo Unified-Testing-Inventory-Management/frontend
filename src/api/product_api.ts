@@ -1,3 +1,4 @@
+import type { UpdateProductData } from './../@types/index';
 import type { Product } from '@/@types'
 import { api } from './axios_api'
 
@@ -14,12 +15,14 @@ export const getProductById = async (id: string) => {
 export const registerProduct = async (
   data: Omit<Product, 'id' | 'createdAt' | 'barCode'>,
 ) => {
+
   const form = new FormData()
+  
   form.append("productName", data.productName)
   form.append("category", data.category)
   form.append("price", String(data.price))
   form.append("stockQuantity", String(data.stockQuantity))
-  
+
   if (data.image) {
     form.append("image", data.image)
   }
@@ -28,8 +31,16 @@ export const registerProduct = async (
   return res.data
 }
 
-export const updateProduct = async (id: string) => {
-  const res = await api.patch(`/api/v1/products/${id}`)
+export const updateProduct = async ({ id, data }: UpdateProductData) => {
+  
+  const form = new FormData()
+  
+  form.append("productName", data.productName)
+  form.append("category", data.category)
+  form.append("price", String(data.price))
+  form.append("stockQuantity", String(data.stockQuantity))
+
+  const res = await api.patch(`/api/v1/products/${id}`, form)
   return res.data
 }
 

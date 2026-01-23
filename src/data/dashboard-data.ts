@@ -1,4 +1,4 @@
-import type { Product, SaleWithDetails, SaleDetail, Sale } from '@/@types'
+import type { Product, SaleDetail, Sale } from '@/@types'
 import { useAllProductsQuery } from '@/services/product_services'
 import { useAllProductSalesQuery } from '@/services/sale_services'
 import { useEffect, useState } from 'react'
@@ -19,7 +19,7 @@ export const useProducts = () => {
 }
 
 export const useProductSales = () => {
-  const [sales, setSales] = useState<SaleWithDetails[] | []>([])
+  const [sales, setSales] = useState<Sale[] | []>([])
   const { data, isLoading, error } = useAllProductSalesQuery();
 
   useEffect(() => {
@@ -33,14 +33,6 @@ export const useProductSales = () => {
   }
 }
 
-
-export const sales: Sale[] = [
-  { Id: 1, UserId: 1, SaleDate: '2024-01-15', TotalAmount: 1299.99 },
-  { Id: 2, UserId: 2, SaleDate: '2024-01-15', TotalAmount: 29.99 },
-  { Id: 3, UserId: 3, SaleDate: '2024-01-14', TotalAmount: 149.99 },
-  { Id: 4, UserId: 4, SaleDate: '2024-01-14', TotalAmount: 399.99 },
-  { Id: 5, UserId: 5, SaleDate: '2024-01-13', TotalAmount: 79.99 },
-]
 
 export const saleDetails: SaleDetail[] = [
   { Id: 1, SaleId: 1, ProductId: 1, Quantity: 1, Price: 1299.99 },

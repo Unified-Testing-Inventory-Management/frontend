@@ -38,6 +38,7 @@ import { getProductStatus } from '@/@types'
 import {
   useArchiveProductById,
   useRegisterProductMutation,
+  useUpdateProductMutation,
 } from '@/services/product_services'
 import { Alert, AlertTitle } from '../ui/alert'
 
@@ -47,8 +48,10 @@ interface ProductsSectionProps {
 
 export function ProductsSection({ products }: ProductsSectionProps) {
   const register = useRegisterProductMutation()
+  const updateProduct = useUpdateProductMutation()
   const archive = useArchiveProductById()
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [isEditProductModalOpen, setIsEditProductModalOpen] = useState<boolean>(false)
   const [isArchiveModalOpen, setIsArchiveModalOpen] = useState<boolean>(false)
   const [productId, setProductId] = useState<string | number | null>(null)
   const [isAddProductDialogOpen, setIsAddProductDialogOpen] =
@@ -66,7 +69,18 @@ export function ProductsSection({ products }: ProductsSectionProps) {
     price: 0,
     stockQuantity: 0,
   })
+  const [editProductData, setEditProductData] = useState<
+    Omit<Product, 'id' | 'createdAt' | 'barCode' | 'image'>
+  >({
+    productName: '',
+    category: '',
+    price: 0,
+    stockQuantity: 0,
+  })
+  const getProductDetails = products.find((product) => product.id == productId);
 
+
+  // Handle Add Product Change
   const handleProductFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target
 
@@ -93,6 +107,35 @@ export function ProductsSection({ products }: ProductsSectionProps) {
     }))
   }
 
+  const handleOpenEditModal = (product: Product) => {
+    setProductId(product.id)
+    setEditProductData({
+      productName: product.productName,
+      category: product.category,
+      price: product.price,
+      stockQuantity: product.stockQuantity,
+    })
+    setIsEditProductModalOpen(true)
+  }
+
+
+  // Handle Edit Product Change
+  const handleUpdateProductDataChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value } = e.target
+
+    setEditProductData((prev) => ({
+      ...prev,
+      [name]:
+        name === 'productName' || name === 'category'
+          ? value
+          : Number(value),
+    }))
+  }
+
+
+  // Submit Product Created
   const handleProductSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -131,6 +174,43 @@ export function ProductsSection({ products }: ProductsSectionProps) {
     })
   }
 
+  // Update Product By Id
+  const handleUpdateProduct = (e: React.FormEvent) => {
+    e.preventDefault()
+    setMessage("")
+
+    if (!productId) return
+
+    updateProduct.mutate(
+      { id: productId as string, data: editProductData },
+      {
+        onSuccess: (data) => {
+          setIsSuccess(true)
+          setMessage(data.message)
+          setIsEditProductModalOpen(false)
+
+          setTimeout(() => {
+            setEditProductData({
+              productName: '',
+              category: '',
+              price: 0,
+              stockQuantity: 0,
+            })
+            setIsSuccess(false)
+            setMessage('')
+            setIsSubmitting(false)
+          }, 3500)
+        },
+        onError: (err: any) => {
+          setIsError(true)
+          setMessage(err.response?.data?.error || 'Update failed')
+        },
+      }
+    )
+  }
+
+
+  // Archive Product
   const handleArchiveProduct = (e: React.FormEvent) => {
     e.preventDefault()
     archive.mutate(productId, {
@@ -160,6 +240,8 @@ export function ProductsSection({ products }: ProductsSectionProps) {
           </AlertTitle>
         </Alert>
       </Activity>
+
+      {/* Product Card Table */}
       <Card className="h-200">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -179,8 +261,8 @@ export function ProductsSection({ products }: ProductsSectionProps) {
               <Table className="w-full">
                 <TableHeader className="sticky top-0 bg-white z-10">
                   <TableRow>
-                    {["Image","Name","Category","Price","Stock","Status","BarCode","Created At","Action"].map((item)=> (
-                    <TableHead key={item}>{item}</TableHead>
+                    {["Image", "Name", "Category", "Price", "Stock", "Status", "BarCode", "Created At", "Action"].map((item) => (
+                      <TableHead key={item}>{item}</TableHead>
                     ))}
                   </TableRow>
                 </TableHeader>
@@ -252,7 +334,7 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                           <TableCell>{product.createdAt}</TableCell>
                           <TableCell>
                             <div className="flex flex-row gap-1.5">
-                              <EditIcon className="text-shadow-blue-500" />
+                              <EditIcon className="text-shadow-blue-500" onClick={() => { handleOpenEditModal(product) }} />
                               <ArchiveIcon
                                 onClick={() => {
                                   setIsArchiveModalOpen(true)
@@ -341,14 +423,13 @@ export function ProductsSection({ products }: ProductsSectionProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="image">Image</Label>
+              <Label htmlFor="image">Image <small className='text-red-500'>(Optional)*</small></Label>
               <Input
                 id="image"
                 name="image"
                 type="file"
                 accept='image/*'
                 onChange={handleProductFormChange}
-                required
               />
               <Activity mode={imagePreview ? "visible" : "hidden"}>
                 <div className='flex justify-center items-center'>
@@ -375,6 +456,110 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                   </div>
                 ) : (
                   'Add Product'
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Product Modal */}
+      <Dialog open={isEditProductModalOpen} onOpenChange={setIsEditProductModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Product {getProductDetails?.productName}</DialogTitle>
+            <DialogDescription>
+              Update the product details
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateProduct} className="space-y-4" encType="multipart/form-data">
+            <div className="space-y-2">
+              <Label htmlFor="productName">Product Name</Label>
+              <Input
+                type='input'
+                id="productName"
+                name="productName"
+                value={editProductData.productName}
+                onChange={handleUpdateProductDataChange}
+                placeholder="Enter product name"
+                required
+                className={`${isError ? 'ring-2 ring-red-500' : ''}`}
+              />
+              <Activity mode={isError ? 'visible' : 'hidden'}>
+                <p className="text-red-500 text-sm">{message}</p>
+              </Activity>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Input
+                type='input'
+                id="category"
+                name="category"
+                value={editProductData.category}
+                onChange={handleUpdateProductDataChange}
+                placeholder="Enter category"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="price">Price</Label>
+              <Input
+                type='input'
+                id="price"
+                name="price"
+                min="1"
+                value={editProductData.price}
+                onChange={handleUpdateProductDataChange}
+                placeholder="0.00"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="stockQuantity">Stock Quantity</Label>
+              <Input
+                id="stockQuantity"
+                name="stockQuantity"
+                type="input"
+                value={editProductData.stockQuantity}
+                onChange={handleUpdateProductDataChange}
+                placeholder="0"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="image">Image <small className='text-red-500'>(Optional)*</small></Label>
+              <Input
+                id="image"
+                name="image"
+                type="file"
+                accept='image/*'
+                onChange={handleUpdateProductDataChange}
+              />
+              <Activity mode={imagePreview ? "visible" : "hidden"}>
+                <div className='flex justify-center items-center'>
+                  <img
+                    src={imagePreview!!}
+                    alt="Product preview"
+                    className="mt-2 h-30 w-35 object-cover rounded border"
+                  />
+                </div>
+              </Activity>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditProductModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                {isSubmitting ? (
+                  <div className="w-full min-h-screen flex justify-center items-center">
+                    <div className="loader-1"></div>
+                  </div>
+                ) : (
+                  'Save Changes'
                 )}
               </Button>
             </div>

@@ -4,6 +4,7 @@ import {
   getAllProducts,
   getProductById,
   archiveProduct,
+  updateProduct,
 } from '@/api/product_api'
 
 export const useRegisterProductMutation = () => {
@@ -29,6 +30,18 @@ export const useGetProductById = (id: string) => {
   return useQuery({
     queryKey: ['products', id],
     queryFn: () => getProductById(id),
+  })
+}
+
+export const useUpdateProductMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: updateProduct,
+    mutationKey: ['products'],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
   })
 }
 

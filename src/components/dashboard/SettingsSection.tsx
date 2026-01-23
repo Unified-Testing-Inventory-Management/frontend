@@ -5,16 +5,13 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { User, Building2, Edit2, Save, X, AtSign, Shield, Package, ShoppingCart, AlertCircle } from 'lucide-react'
+import { User, Building2, Edit2, Save, X, AtSign, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { User as TUserData } from '@/@types'
 import { UserData } from '@/services/user_services'
-import { useProducts } from '@/data/dashboard-data'
-import { sales } from '@/data/dashboard-data'
 
 export function SettingsSection() {
   const user = UserData()
-  const { products } = useProducts()
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState<TUserData>(
     user || {
@@ -34,14 +31,6 @@ export function SettingsSection() {
       role: '',
     }
   )
-
-  // Calculate statistics
-  const totalProducts = products.length
-  const totalSales = sales.length
-  const lowStockItems = products.filter(
-    (p) => Number(p.stockQuantity) <= p.lowStockLevel && Number(p.stockQuantity) > 0,
-  ).length
-  const outOfStockItems = products.filter((p) => Number(p.stockQuantity) === 0).length
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>

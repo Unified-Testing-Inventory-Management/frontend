@@ -31,6 +31,11 @@ export type Product = {
   barCode: string
 }
 
+export type UpdateProductData = {
+  id: string | number;
+  data: Omit<Product, "id" | "createdAt" | "barCode" | "image">
+}
+
 export type Sale = {
   Id: number
   UserId: number

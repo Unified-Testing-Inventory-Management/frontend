@@ -11,7 +11,7 @@ function StocksRouteComponent() {
   const { products } = useProducts()
   // Calculate stock statistics
   const lowStockItems = products.filter(
-    (p: Product) => Number(p.stockQuantity) <= p.lowStockLevel && Number(p.stockQuantity) > 0
+    (p: Product) => Number(p.stockQuantity) <= Number(p.stockQuantity)
   ).length
   const outOfStockItems = products.filter((p: Product) => Number(p.stockQuantity) === 0).length
 

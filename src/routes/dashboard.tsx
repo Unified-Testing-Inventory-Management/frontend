@@ -109,7 +109,7 @@ function RouteComponent() {
     }))
 
 
-  const totalRevenue = sales.reduce((sum, sale) => sum + sale.TotalAmount, 0)
+  const totalRevenue = sales.reduce((sum, sale) => sum + Number(sale.totalAmount), 0)
   const totalProducts = products.length
   const lowStockItems = products.filter(
     (p) => Number(p.stockQuantity) <= 5 && Number(p.stockQuantity) > 0,

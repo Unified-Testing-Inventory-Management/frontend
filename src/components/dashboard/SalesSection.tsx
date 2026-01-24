@@ -9,6 +9,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import type { SaleWithDetails } from '@/@types'
+import { formatDateTime } from '@/utils/formatDateTime'
+import { formatCurrency } from '@/utils/formatCurrency'
 
 interface SalesSectionProps {
   salesWithDetails: Array<SaleWithDetails>
@@ -37,21 +39,21 @@ export function SalesSection({ salesWithDetails }: SalesSectionProps) {
             </TableHeader>
             <TableBody>
               {salesWithDetails.map((sale) => (
-                <TableRow key={sale.Id}>
-                  <TableCell className="font-medium">#{sale.Id}</TableCell>
-                  <TableCell>User #{sale.UserId}</TableCell>
+                <TableRow key={sale.id}>
+                  <TableCell className="font-medium">{sale.id}</TableCell>
+                  <TableCell>{sale.userId}</TableCell>
                   <TableCell>
-                    {sale.Items.map((item, idx) => (
+                    {sale.saleDetails.map((item, idx) => (
                       <div key={idx} className="text-sm">
-                        {item.ProductName} (${item.Price.toFixed(2)})
+                        {item.productName} (&#8369;{formatCurrency(item.price)})
                       </div>
                     ))}
                   </TableCell>
                   <TableCell>
-                    {sale.Items.reduce((sum, item) => sum + item.Quantity, 0)}
+                    {sale.saleDetails.reduce((sum, item) => sum + item.quantity, 0)}
                   </TableCell>
-                  <TableCell>${sale.TotalAmount}</TableCell>
-                  <TableCell>{sale.SaleDate}</TableCell>
+                  <TableCell>&#8369;{formatCurrency(sale.totalAmount)}</TableCell>
+                  <TableCell>{formatDateTime(sale.saleDate)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

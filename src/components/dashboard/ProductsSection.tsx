@@ -5,7 +5,7 @@ import {
   PackageIcon,
   Plus,
 } from 'lucide-react'
-import { Activity, useState } from 'react'
+import { Activity, useMemo, useState } from 'react'
 import type { Product } from '@/@types'
 import {
   Card,
@@ -41,6 +41,8 @@ import {
   useUpdateProductMutation,
 } from '@/services/product_services'
 import { Alert, AlertTitle } from '../ui/alert'
+import { formatDateTime } from '@/utils/formatDateTime'
+import { formatCurrency } from '@/utils/formatCurrency'
 
 interface ProductsSectionProps {
   products: Array<Product>
@@ -60,6 +62,7 @@ export function ProductsSection({ products }: ProductsSectionProps) {
   const [isSuccess, setIsSuccess] = useState<boolean>(false)
   const [message, setMessage] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [search, setSearch] = useState<string>("")
   const [productFormData, setProductFormData] = useState<
     Omit<Product, 'id' | 'createdAt' | 'barCode'>
   >({
@@ -78,7 +81,6 @@ export function ProductsSection({ products }: ProductsSectionProps) {
     stockQuantity: 0,
   })
   const getProductDetails = products.find((product) => product.id == productId);
-
 
   // Handle Add Product Change
   const handleProductFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,7 +120,6 @@ export function ProductsSection({ products }: ProductsSectionProps) {
     setIsEditProductModalOpen(true)
   }
 
-
   // Handle Edit Product Change
   const handleUpdateProductDataChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -133,7 +134,6 @@ export function ProductsSection({ products }: ProductsSectionProps) {
           : Number(value),
     }))
   }
-
 
   // Submit Product Created
   const handleProductSubmit = (e: React.FormEvent) => {
@@ -209,7 +209,6 @@ export function ProductsSection({ products }: ProductsSectionProps) {
     )
   }
 
-
   // Archive Product
   const handleArchiveProduct = (e: React.FormEvent) => {
     e.preventDefault()
@@ -230,6 +229,10 @@ export function ProductsSection({ products }: ProductsSectionProps) {
     })
   }
 
+  const filteredProduct = useMemo(() => {
+    return products.filter((product) => product.productName.toLowerCase().includes(search))
+  }, [search, products])
+
   return (
     <>
       <Activity mode={isSuccess ? 'visible' : 'hidden'}>
@@ -244,15 +247,23 @@ export function ProductsSection({ products }: ProductsSectionProps) {
       {/* Product Card Table */}
       <Card className="h-200">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Products</CardTitle>
-              <CardDescription>Manage your product inventory</CardDescription>
+          <div className='flex flex-col gap-4'>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Products</CardTitle>
+                <CardDescription>Manage your product inventory</CardDescription>
+              </div>
+              <Button className='hidden md:flex' onClick={() => setIsAddProductDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Product
+              </Button>
+              <Button className='md:hidden' onClick={() => setIsAddProductDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+              </Button>
             </div>
-            <Button onClick={() => setIsAddProductDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Product
-            </Button>
+            <div className='w-sm'>
+              <Input className='py-6 px-4' placeholder='Search your product...' name='search' onChange={(e) => setSearch(e.target.value)} />
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -268,7 +279,7 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                 </TableHeader>
 
                 <TableBody>
-                  {products.length === 0 ? (
+                  {filteredProduct.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9}>
                         <div className="flex flex-col h-120 items-center justify-center py-10 text-muted-foreground">
@@ -284,7 +295,7 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    products.map((product) => {
+                    filteredProduct.map((product) => {
                       const status = getProductStatus(product)
                       return (
                         <TableRow key={product.id}>
@@ -308,7 +319,7 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                           <TableCell>{product.productName}</TableCell>
                           <TableCell>{product.category}</TableCell>
                           <TableCell>
-                            &#8369; {product.price.toFixed(2)}
+                            &#8369; {formatCurrency(product.price)}
                           </TableCell>
                           <TableCell>{product.stockQuantity}</TableCell>
                           <TableCell>
@@ -331,7 +342,7 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                               alt="barcode img"
                             />
                           </TableCell>
-                          <TableCell>{product.createdAt}</TableCell>
+                          <TableCell>{formatDateTime(product.createdAt)}</TableCell>
                           <TableCell>
                             <div className="flex flex-row gap-1.5">
                               <EditIcon className="text-shadow-blue-500" onClick={() => { handleOpenEditModal(product) }} />

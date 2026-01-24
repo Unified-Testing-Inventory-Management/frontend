@@ -38,9 +38,9 @@ export type UpdateProductData = {
 
 export type Sale = {
   Id: number
-  UserId: number
-  SaleDate: string
-  TotalAmount: number
+  userId: number
+  saleDate: string
+  totalAmount: number
 }
 
 export type SaleDetail = {

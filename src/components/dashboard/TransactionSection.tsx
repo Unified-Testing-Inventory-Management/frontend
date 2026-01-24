@@ -29,6 +29,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { getProductStatus } from '@/@types'
 import { ShoppingCart } from 'lucide-react'
+import { formatCurrency } from '@/utils/formatCurrency'
 
 interface TransactionSectionProps {
   products: Array<Product>
@@ -128,7 +129,7 @@ function TransactionSection({ products }: TransactionSectionProps) {
                         <TableCell>{product.productName}</TableCell>
                         <TableCell>{product.category}</TableCell>
                         <TableCell>
-                          &#8369; {product.price.toFixed(2)}
+                          &#8369; {formatCurrency(product.price)}
                         </TableCell>
                         <TableCell>{product.stockQuantity}</TableCell>
                         <TableCell>

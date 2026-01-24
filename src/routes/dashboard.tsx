@@ -84,9 +84,9 @@ function RouteComponent() {
   }
 
   const salesWithDetails: SaleWithDetails[] = sales.map((sale) => {
-    const details = saleDetails.filter((sd) => sd.SaleId === sale.Id)
+    const details = saleDetails.filter((sd) => sd.saleId === sale.Id)
     const saleItems = details.map((detail) => {
-      const product = products.find((p) => p.id === detail.ProductId)
+      const product = products.find((p) => p.id === detail.productId)
       return {
         ...detail,
         ProductName: product?.productName || 'Unknown Product',

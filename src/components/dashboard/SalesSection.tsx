@@ -50,22 +50,20 @@ export function SalesSection({ salesWithDetails }: SalesSectionProps) {
                   <TableCell>
                     {sale.Items.reduce((sum, item) => sum + item.Quantity, 0)}
                   </TableCell>
-                  <TableCell>${sale.TotalAmount.toFixed(2)}</TableCell>
+                  <TableCell>${sale.TotalAmount}</TableCell>
                   <TableCell>{sale.SaleDate}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
           <div>
-            {salesWithDetails.length == 0 ? (
+            {salesWithDetails.length == 0 && (
               <div className="w-full h-90 mt-5 flex flex-col justify-center items-center gap-2 py-4">
                 <ShoppingCart className="h-8 w-8 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">
                   Don't have sales right now.
                 </span>
               </div>
-            ) : (
-              ''
             )}
           </div>
         </CardContent>

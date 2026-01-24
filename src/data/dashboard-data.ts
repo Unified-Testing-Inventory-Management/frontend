@@ -35,9 +35,9 @@ export const useProductSales = () => {
 
 
 export const saleDetails: SaleDetail[] = [
-  { Id: 1, SaleId: 1, ProductId: 1, Quantity: 1, Price: 1299.99 },
-  { Id: 2, SaleId: 2, ProductId: 2, Quantity: 1, Price: 29.99 },
-  { Id: 3, SaleId: 3, ProductId: 3, Quantity: 1, Price: 149.99 },
-  { Id: 4, SaleId: 4, ProductId: 4, Quantity: 1, Price: 399.99 },
-  { Id: 5, SaleId: 5, ProductId: 6, Quantity: 1, Price: 79.99 },
+  { id: 1, saleId: 1, productId: 1, quantity: 1, price: 1299.99 },
+  { id: 2, saleId: 2, productId: 2, quantity: 1, price: 29.99 },
+  { id: 3, saleId: 3, productId: 3, quantity: 1, price: 149.99 },
+  { id: 4, saleId: 4, productId: 4, quantity: 1, price: 399.99 },
+  { id: 5, saleId: 5, productId: 6, quantity: 1, price: 79.99 },
 ]

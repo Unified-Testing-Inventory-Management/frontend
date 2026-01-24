@@ -49,12 +49,12 @@ export function OverviewSection({
     const dayToRevenue = new Map<string, number>()
 
     for (const sale of salesWithDetails) {
-      const d = new Date(sale.SaleDate)
+      const d = new Date(sale.saleDate)
       const dayKey = Number.isNaN(d.getTime())
-        ? sale.SaleDate
+        ? sale.saleDate
         : d.toISOString().slice(0, 10)
 
-      dayToRevenue.set(dayKey, (dayToRevenue.get(dayKey) ?? 0) + sale.TotalAmount)
+      dayToRevenue.set(dayKey, (dayToRevenue.get(dayKey) ?? 0) + sale.totalAmount)
     }
 
     const fmt = new Intl.DateTimeFormat('en-US', {
@@ -76,11 +76,11 @@ export function OverviewSection({
 
   const topSalesData = salesWithDetails
     .slice()
-    .sort((a, b) => b.TotalAmount - a.TotalAmount)
+    .sort((a, b) => b.totalAmount - a.totalAmount)
     .slice(0, 5)
     .map((sale) => ({
       sale: `#${sale.Id}`,
-      revenue: Number(sale.TotalAmount.toFixed(2)),
+      revenue: sale.totalAmount,
     }))
 
   return (
@@ -89,11 +89,11 @@ export function OverviewSection({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            &#8369;
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              $
+              &#8369;
               {totalRevenue.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
@@ -146,6 +146,7 @@ export function OverviewSection({
         </Card>
       </div>
 
+      {/*Revenue Trend*/}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -177,7 +178,7 @@ export function OverviewSection({
                       <ChartTooltipContent
                         formatter={(value) => {
                           const n = typeof value === 'number' ? value : Number(value)
-                          return `$${Number.isNaN(n) ? value : n.toFixed(2)}`
+                          return `₱${Number.isNaN(n) ? value : n.toFixed(2)}`
                         }}
                       />
                     }
@@ -196,6 +197,7 @@ export function OverviewSection({
           </CardContent>
         </Card>
 
+        {/*Top Sales*/}
         <Card>
           <CardHeader>
             <CardTitle>Top Sales</CardTitle>
@@ -226,7 +228,7 @@ export function OverviewSection({
                       <ChartTooltipContent
                         formatter={(value) => {
                           const n = typeof value === 'number' ? value : Number(value)
-                          return `$${Number.isNaN(n) ? value : n.toFixed(2)}`
+                          return `₱${Number.isNaN(n) ? value : n.toFixed(2)}`
                         }}
                       />
                     }
@@ -275,9 +277,9 @@ export function OverviewSection({
                           <TableCell className="font-medium">
                             {sale.Items.map((item) => item.ProductName).join(', ')}
                           </TableCell>
-                          <TableCell>User #{sale.UserId}</TableCell>
-                          <TableCell>${sale.TotalAmount.toFixed(2)}</TableCell>
-                          <TableCell>{sale.SaleDate}</TableCell>
+                          <TableCell>User #{sale.userId}</TableCell>
+                          <TableCell>${sale.totalAmount}</TableCell>
+                          <TableCell>{sale.saleDate}</TableCell>
                         </TableRow>
                       ))
                     )

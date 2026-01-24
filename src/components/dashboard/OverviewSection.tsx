@@ -1,4 +1,4 @@
-import { AlertCircle, DollarSign, Package, ShoppingCart } from 'lucide-react'
+import { AlertCircle, Package, ShoppingCart } from 'lucide-react'
 import type { SaleWithDetails, StockAlert } from '@/@types'
 import {
   Card,
@@ -25,6 +25,8 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Area, AreaChart, Bar, BarChart } from 'recharts'
+import { formatDateTime } from '@/utils/formatDateTime'
+import { formatCurrency } from '@/utils/formatCurrency'
 
 interface OverviewSectionProps {
   totalRevenue: number
@@ -79,13 +81,16 @@ export function OverviewSection({
     .sort((a, b) => b.totalAmount - a.totalAmount)
     .slice(0, 5)
     .map((sale) => ({
-      sale: `#${sale.Id}`,
+      sale: `#${sale.id}`,
       revenue: sale.totalAmount,
     }))
 
   return (
     <div className="space-y-4">
+      {/* Top Section */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+
+        {/* Total Revenue */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -94,16 +99,15 @@ export function OverviewSection({
           <CardContent>
             <div className="text-2xl font-bold">
               &#8369;
-              {totalRevenue.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              {formatCurrency(totalRevenue)}
             </div>
             <p className="text-xs text-muted-foreground">
               From {totalSales} sales
             </p>
           </CardContent>
         </Card>
+
+        {/* Total Products */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -118,6 +122,8 @@ export function OverviewSection({
             </p>
           </CardContent>
         </Card>
+
+        {/* Low Stock Items */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -132,6 +138,8 @@ export function OverviewSection({
             </p>
           </CardContent>
         </Card>
+
+        {/* Out of Stock */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
@@ -146,8 +154,9 @@ export function OverviewSection({
         </Card>
       </div>
 
-      {/*Revenue Trend*/}
+      {/* Center Section */}
       <div className="grid gap-4 md:grid-cols-2">
+        {/*Revenue Trend*/}
         <Card>
           <CardHeader>
             <CardTitle>Revenue Trend</CardTitle>
@@ -155,12 +164,12 @@ export function OverviewSection({
           </CardHeader>
           <CardContent>
             {revenueTrendData.length === 0 ? (
-              <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
+              <div className="flex h-55 items-center justify-center text-sm text-muted-foreground">
                 No sales yet — revenue trend will appear here.
               </div>
             ) : (
               <ChartContainer
-                className="h-[220px] w-full"
+                className="h-55 w-full"
                 config={{
                   revenue: {
                     label: 'Revenue',
@@ -178,7 +187,10 @@ export function OverviewSection({
                       <ChartTooltipContent
                         formatter={(value) => {
                           const n = typeof value === 'number' ? value : Number(value)
-                          return `₱${Number.isNaN(n) ? value : n.toFixed(2)}`
+                          return `₱${Number.isNaN(n) ? value : n.toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                          })}`
                         }}
                       />
                     }
@@ -205,12 +217,12 @@ export function OverviewSection({
           </CardHeader>
           <CardContent>
             {topSalesData.length === 0 ? (
-              <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
+              <div className="flex h-55 items-center justify-center text-sm text-muted-foreground">
                 No sales yet — top sales will appear here.
               </div>
             ) : (
               <ChartContainer
-                className="h-[220px] w-full"
+                className="h-55 w-full"
                 config={{
                   revenue: {
                     label: 'Revenue',
@@ -228,7 +240,7 @@ export function OverviewSection({
                       <ChartTooltipContent
                         formatter={(value) => {
                           const n = typeof value === 'number' ? value : Number(value)
-                          return `₱${Number.isNaN(n) ? value : n.toFixed(2)}`
+                          return `₱${Number.isNaN(n) ? formatCurrency(value) : formatCurrency(n)}`
                         }}
                       />
                     }
@@ -241,7 +253,9 @@ export function OverviewSection({
         </Card>
       </div>
 
+      {/* Bottom Section */}
       <div className="grid gap-4 md:grid-cols-2">
+        {/* Recent Sales Table */}
         <Card>
           <CardHeader>
             <CardTitle>Recent Sales</CardTitle>
@@ -252,10 +266,10 @@ export function OverviewSection({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[200px]">Product</TableHead>
-                    <TableHead className="w-[120px]">User ID</TableHead>
-                    <TableHead className="w-[120px]">Amount</TableHead>
-                    <TableHead className="w-[150px]">Date</TableHead>
+                    <TableHead className="w-50">Product</TableHead>
+                    <TableHead className="w-30">User ID</TableHead>
+                    <TableHead className="w-30">Amount</TableHead>
+                    <TableHead className="w-37.5">Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -272,19 +286,20 @@ export function OverviewSection({
                         </TableCell>
                       </TableRow>
                     ) : (
-                      salesWithDetails.slice(0, 5).map((sale) => (
-                        <TableRow key={sale.Id}>
-                          <TableCell className="font-medium">
-                            {sale.saleDetails.map((item) => item.productName).join(', ')}
-                          </TableCell>
-                          <TableCell>{sale.userId}</TableCell>
-                          <TableCell>${sale.totalAmount.toLocaleString("en-Us", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}</TableCell>
-                          <TableCell>{sale.saleDate}</TableCell>
-                        </TableRow>
-                      ))
+                      salesWithDetails.slice(0, 10)
+                        .map((sale) => (
+                          <TableRow key={sale.id}>
+                            <TableCell className="font-medium">
+                              {sale.saleDetails.map((item) => item.productName).join(', ')}
+                            </TableCell>
+                            <TableCell>{sale.userId}</TableCell>
+                            <TableCell>&#8369;{sale.totalAmount.toLocaleString("en-Us", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}</TableCell>
+                            <TableCell>{formatDateTime(sale.saleDate)}</TableCell>
+                          </TableRow>
+                        ))
                     )
                   }
                 </TableBody>
@@ -293,6 +308,7 @@ export function OverviewSection({
           </CardContent>
         </Card>
 
+        {/* Stock Alert Table */}
         <Card>
           <CardHeader>
             <CardTitle>Stock Alerts</CardTitle>

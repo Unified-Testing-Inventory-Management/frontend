@@ -275,10 +275,13 @@ export function OverviewSection({
                       salesWithDetails.slice(0, 5).map((sale) => (
                         <TableRow key={sale.Id}>
                           <TableCell className="font-medium">
-                            {sale.Items.map((item) => item.ProductName).join(', ')}
+                            {sale.saleDetails.map((item) => item.productName).join(', ')}
                           </TableCell>
-                          <TableCell>User #{sale.userId}</TableCell>
-                          <TableCell>${sale.totalAmount}</TableCell>
+                          <TableCell>{sale.userId}</TableCell>
+                          <TableCell>${sale.totalAmount.toLocaleString("en-Us", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}</TableCell>
                           <TableCell>{sale.saleDate}</TableCell>
                         </TableRow>
                       ))

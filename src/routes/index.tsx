@@ -91,6 +91,7 @@ function App() {
                 value={formData.username}
                 onChange={handleChange}
                 required
+                autoFocus
                 placeholder="Enter your username"
                 className={`${error ? 'ring-2 ring-red-500' : ''}`}
               />

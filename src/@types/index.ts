@@ -44,16 +44,16 @@ export type Sale = {
 }
 
 export type SaleDetail = {
-  Id: number
-  SaleId: number
-  ProductId: number
-  Quantity: number
-  Price: number
-  ProductName?: string
+  id: number
+  saleId: number
+  productId: number
+  quantity: number
+  price: number
+  productName?: string
 }
 
 export type SaleWithDetails = Sale & {
-  Items: SaleDetail[]
+  saleDetails: SaleDetail[]
 }
 
 export type StockAlert = {

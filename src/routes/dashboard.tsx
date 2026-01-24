@@ -104,7 +104,7 @@ function RouteComponent() {
       id: Number(p.id),
       productName: p.productName,
       current: Number(p.stockQuantity),
-      min: 10,
+      min: 5,
       status: getStockAlertStatus(p),
     }))
 

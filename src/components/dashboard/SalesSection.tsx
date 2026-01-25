@@ -11,12 +11,29 @@ import {
 import type { SaleWithDetails } from '@/@types'
 import { formatDateTime } from '@/utils/formatDateTime'
 import { formatCurrency } from '@/utils/formatCurrency'
+import { Input } from '../ui/input'
+import { useMemo, useState } from 'react'
 
 interface SalesSectionProps {
   salesWithDetails: Array<SaleWithDetails>
 }
 
 export function SalesSection({ salesWithDetails }: SalesSectionProps) {
+  const [search, setSearch] = useState<string>("")
+
+  //Filtered product base on the search
+  const filteredSaleProduct = useMemo(() => {
+    const query = search.toLowerCase().trim()
+
+    if (!query) return salesWithDetails
+
+    return salesWithDetails.filter((sale) =>
+      sale.saleDetails.some((item) =>
+        item.productName?.toLowerCase().includes(query) ||
+        item.category?.toLowerCase().includes(query)
+      )
+    )
+  }, [search, salesWithDetails])
 
   return (
     <div className="space-y-4">
@@ -24,22 +41,21 @@ export function SalesSection({ salesWithDetails }: SalesSectionProps) {
         <CardHeader>
           <CardTitle>Sales Overview</CardTitle>
           <CardDescription>Complete sales transaction history</CardDescription>
+          <div className='w-sm'>
+            <Input className='py-6 px-4' placeholder='Search product sale...' onChange={(e) => setSearch(e.target.value)}></Input>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Sale ID</TableHead>
-                <TableHead>User ID</TableHead>
-                <TableHead>Products</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead>Total Amount</TableHead>
-                <TableHead>Sale Date</TableHead>
+                {["Sale ID", "User ID", "Products", "Category", "Quantity", "Total Amount", "Sale Date"].map((item) => (
+                  <TableHead key={item}>{item}</TableHead>
+                ))}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {salesWithDetails.map((sale) => (
+              {filteredSaleProduct.map((sale) => (
                 <TableRow key={sale.id}>
                   <TableCell className="font-medium">{sale.id}</TableCell>
                   <TableCell>{sale.userId}</TableCell>
@@ -70,6 +86,14 @@ export function SalesSection({ salesWithDetails }: SalesSectionProps) {
                 <ShoppingCart className="h-8 w-8 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">
                   Don't have sales right now.
+                </span>
+              </div>
+            )}
+            {filteredSaleProduct.length == 0 && (
+              <div className="w-full h-90 mt-5 flex flex-col justify-center items-center gap-2 py-4">
+                <ShoppingCart className="h-8 w-8 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  No products found for "{search}"
                 </span>
               </div>
             )}

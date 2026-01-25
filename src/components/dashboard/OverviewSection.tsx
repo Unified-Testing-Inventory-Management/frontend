@@ -94,7 +94,7 @@ export function OverviewSection({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            &#8369;
+           <span className='h-4 w-4 text-muted-foreground'>&#8369;</span>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">

@@ -84,10 +84,9 @@ export function StocksSection({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Current Stock</TableHead>
-                <TableHead>Status</TableHead>
+                {["Product", "Category", "Current Stock", "Status"].map((item) => (
+                  <TableHead key={item}>{item}</TableHead>
+                ))}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -125,8 +124,8 @@ export function StocksSection({
                           )}
                           {Number(product.stockQuantity) >
                             LOW_STOCK_THRESHOLD && (
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
-                          )}
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            )}
                         </div>
                       </TableCell>
                       <TableCell>

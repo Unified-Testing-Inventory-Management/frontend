@@ -1,4 +1,4 @@
-import type { Product, SaleDetail, Sale } from '@/@types'
+import type { Product, Sale } from '@/@types'
 import { useAllProductsQuery } from '@/services/product_services'
 import { useAllProductSalesQuery } from '@/services/sale_services'
 import { useEffect, useState } from 'react'
@@ -33,11 +33,25 @@ export const useProductSales = () => {
   }
 }
 
+export const useSaleDetails = () => {
+  const [saleDetails, setSaleDetails] = useState<Sale[] | []>([])
+  const { data, isLoading, error } = useAllProductSalesQuery();
 
-export const saleDetails: SaleDetail[] = [
-  { id: 1, saleId: 1, productId: 1, quantity: 1, price: 1299.99 },
-  { id: 2, saleId: 2, productId: 2, quantity: 1, price: 29.99 },
-  { id: 3, saleId: 3, productId: 3, quantity: 1, price: 149.99 },
-  { id: 4, saleId: 4, productId: 4, quantity: 1, price: 399.99 },
-  { id: 5, saleId: 5, productId: 6, quantity: 1, price: 79.99 },
-]
+  useEffect(() => {
+    setSaleDetails(data?.data.saleDetails || [])
+  }, [data])
+
+  return {
+    saleDetails,
+    isLoading,
+    error
+  }
+}
+
+// export const saleDetails: SaleDetail[] = [
+//   { id: 1, saleId: 1, productId: 1, quantity: 1, price: 1299.99 },
+//   { id: 2, saleId: 2, productId: 2, quantity: 1, price: 29.99 },
+//   { id: 3, saleId: 3, productId: 3, quantity: 1, price: 149.99 },
+//   { id: 4, saleId: 4, productId: 4, quantity: 1, price: 399.99 },
+//   { id: 5, saleId: 5, productId: 6, quantity: 1, price: 79.99 },
+// ]

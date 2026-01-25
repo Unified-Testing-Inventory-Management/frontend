@@ -32,6 +32,7 @@ export function SalesSection({ salesWithDetails }: SalesSectionProps) {
                 <TableHead>Sale ID</TableHead>
                 <TableHead>User ID</TableHead>
                 <TableHead>Products</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead>Quantity</TableHead>
                 <TableHead>Total Amount</TableHead>
                 <TableHead>Sale Date</TableHead>
@@ -47,6 +48,11 @@ export function SalesSection({ salesWithDetails }: SalesSectionProps) {
                       <div key={idx} className="text-sm">
                         {item.productName} (&#8369;{formatCurrency(item.price)})
                       </div>
+                    ))}
+                  </TableCell>
+                  <TableCell>
+                    {sale.saleDetails.map((item) => (
+                      item.category
                     ))}
                   </TableCell>
                   <TableCell>

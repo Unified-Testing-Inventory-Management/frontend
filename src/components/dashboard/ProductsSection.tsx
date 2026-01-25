@@ -229,8 +229,15 @@ export function ProductsSection({ products }: ProductsSectionProps) {
     })
   }
 
+  //Filtered product base on the search
   const filteredProduct = useMemo(() => {
-    return products.filter((product) => product.productName.toLowerCase().includes(search))
+    const query = search.toLowerCase().trim()
+
+    if(!query) return products
+    
+    return products.filter((product) =>
+      product.productName.toLowerCase().includes(query) ||
+      product.category.toLowerCase().includes(query))
   }, [search, products])
 
   return (
@@ -279,7 +286,70 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                 </TableHeader>
 
                 <TableBody>
-                  {filteredProduct.length === 0 ? (
+                  {filteredProduct.map((product) => {
+                    const status = getProductStatus(product)
+                    return (
+                      <TableRow key={product.id}>
+                        <TableCell>
+                          {product.image ? (
+                            <img
+                              className="w-12 h-12 object-cover rounded"
+                              src={
+                                typeof product.image == 'string'
+                                  ? product.image
+                                  : ''
+                              }
+                              alt={product.productName || 'Product image'}
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-500 text-xs">
+                              No Image
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>{product.productName}</TableCell>
+                        <TableCell>{product.category}</TableCell>
+                        <TableCell>
+                          &#8369; {formatCurrency(product.price)}
+                        </TableCell>
+                        <TableCell>{product.stockQuantity}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              status === 'In Stock'
+                                ? 'default'
+                                : status === 'Low Stock'
+                                  ? 'secondary'
+                                  : 'destructive'
+                            }
+                          >
+                            {status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <img
+                            className="w-12 h-12 object-cover rounded"
+                            src={`data:image/png;base64,${product.barCode}`}
+                            alt="barcode img"
+                          />
+                        </TableCell>
+                        <TableCell>{formatDateTime(product.createdAt)}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-row gap-1.5">
+                            <EditIcon className="text-shadow-blue-500" onClick={() => { handleOpenEditModal(product) }} />
+                            <ArchiveIcon
+                              onClick={() => {
+                                setIsArchiveModalOpen(true)
+                                setProductId(product.id)
+                              }}
+                              className="text-orange-500"
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                  {products.length == 0 && (
                     <TableRow>
                       <TableCell colSpan={9}>
                         <div className="flex flex-col h-120 items-center justify-center py-10 text-muted-foreground">
@@ -294,70 +364,21 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    filteredProduct.map((product) => {
-                      const status = getProductStatus(product)
-                      return (
-                        <TableRow key={product.id}>
-                          <TableCell>
-                            {product.image ? (
-                              <img
-                                className="w-12 h-12 object-cover rounded"
-                                src={
-                                  typeof product.image == 'string'
-                                    ? product.image
-                                    : ''
-                                }
-                                alt={product.productName || 'Product image'}
-                              />
-                            ) : (
-                              <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-500 text-xs">
-                                No Image
-                              </div>
-                            )}
-                          </TableCell>
-                          <TableCell>{product.productName}</TableCell>
-                          <TableCell>{product.category}</TableCell>
-                          <TableCell>
-                            &#8369; {formatCurrency(product.price)}
-                          </TableCell>
-                          <TableCell>{product.stockQuantity}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                status === 'In Stock'
-                                  ? 'default'
-                                  : status === 'Low Stock'
-                                    ? 'secondary'
-                                    : 'destructive'
-                              }
-                            >
-                              {status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <img
-                              className="w-12 h-12 object-cover rounded"
-                              src={`data:image/png;base64,${product.barCode}`}
-                              alt="barcode img"
-                            />
-                          </TableCell>
-                          <TableCell>{formatDateTime(product.createdAt)}</TableCell>
-                          <TableCell>
-                            <div className="flex flex-row gap-1.5">
-                              <EditIcon className="text-shadow-blue-500" onClick={() => { handleOpenEditModal(product) }} />
-                              <ArchiveIcon
-                                onClick={() => {
-                                  setIsArchiveModalOpen(true)
-                                  setProductId(product.id)
-                                }}
-                                className="text-orange-500"
-                              />
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })
+                  )}
+                  {filteredProduct.length == 0 && (
+                    <TableRow>
+                      <TableCell colSpan={9}>
+                        <div className="flex flex-col h-120 items-center justify-center py-10 text-muted-foreground">
+                          <PackageIcon className="mb-3 h-10 w-10 text-gray-400" />
+                          <p className="text-base font-medium">
+                            No products found
+                          </p>
+                          <p className="text-sm">
+                            No products found for "{search}"
+                          </p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   )}
                 </TableBody>
               </Table>

@@ -1,8 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import React, { useState } from 'react'
 import {
-  BarChart3,
-  Settings,
   Package,
   LayoutDashboard,
   ShoppingCart,
@@ -38,7 +36,7 @@ import { ProductsSection } from '@/components/dashboard/ProductsSection'
 import { SalesSection } from '@/components/dashboard/SalesSection'
 import { StocksSection } from '@/components/dashboard/StocksSection'
 import { SettingsSection } from '@/components/dashboard/SettingsSection'
-import { saleDetails, useProductSales } from '@/data/dashboard-data'
+import { useSaleDetails, useProductSales } from '@/data/dashboard-data'
 import { useProducts } from '@/data/dashboard-data'
 import { getStockAlertStatus } from '@/@types'
 import type { SaleWithDetails, StockAlert } from '@/@types'
@@ -66,6 +64,7 @@ function RouteComponent() {
   const queryClient = useQueryClient()
   const { products } = useProducts()
   const { sales } = useProductSales();
+  const { saleDetails } = useSaleDetails()
 
   const handleLogout = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,10 +82,10 @@ function RouteComponent() {
     })
   }
 
-  const salesWithDetails: SaleWithDetails[] = sales.map((sale) => {
-    const details = saleDetails.filter((sd) => sd.saleId === sale.Id)
+  const salesWithDetails = sales.map((sale) => {
+    const details = saleDetails.filter((sd) => sd.id === sale.id)
     const saleItems = details.map((detail) => {
-      const product = products.find((p) => p.id === detail.productId)
+      const product = products.find((p) => p.id === detail.id)
       return {
         ...detail,
         ProductName: product?.productName || 'Unknown Product',
@@ -157,25 +156,6 @@ function RouteComponent() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-          <SidebarGroup>
-            <SidebarGroupLabel>System</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <BarChart3 />
-                    <span>Analytics</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <Settings />
-                    <span>Settings</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

@@ -49,7 +49,8 @@ export type SaleDetail = {
   productId: number
   quantity: number
   price: number
-  productName?: string
+  productName: string
+  category: string
 }
 
 export type SaleWithDetails = Sale & {

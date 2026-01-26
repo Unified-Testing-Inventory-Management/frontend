@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import type { Product } from '@/@types'
+import React, { Activity, useMemo, useState } from 'react'
+import type { Product, TransactionData } from '@/@types'
 import {
   Card,
   CardContent,
@@ -28,17 +28,24 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { getProductStatus } from '@/@types'
-import { ShoppingCart } from 'lucide-react'
+import { CheckCircle2Icon, PackageIcon, ShoppingCart } from 'lucide-react'
 import { formatCurrency } from '@/utils/formatCurrency'
+import { useTransactionProduct } from '@/services/sale_services'
+import { Alert, AlertTitle } from '../ui/alert'
 
 interface TransactionSectionProps {
   products: Array<Product>
 }
 
 function TransactionSection({ products }: TransactionSectionProps) {
+  const transactionProduct = useTransactionProduct()
+  const [message, setMessage] = useState<string>("")
+  const [isSuccess, setIsSuccess] = useState<boolean>(false)
+  const [isError, setIsError] = useState<boolean>(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
   const [quantity, setQuantity] = useState<number>(1)
+  const [search, setSearch] = useState<string>("")
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product)
@@ -64,19 +71,60 @@ function TransactionSection({ products }: TransactionSectionProps) {
     setQuantity(1)
   }
 
-  const handleTransaction = (e: React.FormEvent) => {
+  const handleTransaction = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement transaction logic
-    console.log('Transaction:', {
-      product: selectedProduct,
-      quantity,
-      total: calculateTotal(),
+
+    const transactionDetails: TransactionData = {
+      productId: String(selectedProduct?.id),
+      productName: String(selectedProduct?.productName),
+      category: String(selectedProduct?.category),
+      totalAmount: calculateTotal(),
+      quantity: quantity,
+      price: Number(selectedProduct?.price)
+    }
+
+    console.log('Transaction:', transactionDetails)
+
+    await transactionProduct.mutateAsync({ data: transactionDetails }, {
+      onSuccess: (data: any) => {
+        setIsSuccess(true)
+        setMessage(data.message)
+        handleCloseDialog()
+
+        setTimeout(() => {
+          setIsSuccess(false)
+          setMessage("")
+        }, 3500)
+      },
+      onError: (err: any) => {
+        if (err.response) {
+          setMessage(err.response?.data.error)
+          setIsError(true)
+        }
+      }
     })
-    handleCloseDialog()
   }
+
+  const filteredProducts = useMemo(() => {
+    const query = search.toLowerCase().trim()
+
+    if (!query) return products
+
+    return products.filter((item) =>
+      item.productName.toLowerCase().includes(query)
+    )
+  }, [search, products])
 
   return (
     <>
+      <Activity mode={isSuccess ? 'visible' : 'hidden'}>
+        <Alert className="animate-fade-in-out bg-green-500 w-70 absolute right-2 top-4">
+          <CheckCircle2Icon className="bg-green-500 text-green-500" />
+          <AlertTitle>
+            <span className="text-white text-[16px] font-bold">{message}</span>
+          </AlertTitle>
+        </Alert>
+      </Activity>
       <Card>
         <CardHeader>
           <div>
@@ -85,10 +133,13 @@ function TransactionSection({ products }: TransactionSectionProps) {
               Click on a product to create a transaction
             </CardDescription>
           </div>
+          <div className='w-sm'>
+            <Input className="py-6 px-4" placeholder="Search product transaction..." onChange={(e) => setSearch(e.target.value)}></Input>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="relative max-h-[600px] overflow-hidden">
-            <div className="max-h-[600px] overflow-y-auto">
+          <div className="relative max-h-150 overflow-hidden">
+            <div className="max-h-150 overflow-y-auto">
               <Table className="w-full">
                 <TableHeader className="sticky top-0 bg-white z-10">
                   <TableRow>
@@ -101,7 +152,7 @@ function TransactionSection({ products }: TransactionSectionProps) {
                 </TableHeader>
 
                 <TableBody>
-                  {products.map((product) => {
+                  {filteredProducts.map((product) => {
                     const status = getProductStatus(product)
                     return (
                       <TableRow
@@ -148,6 +199,21 @@ function TransactionSection({ products }: TransactionSectionProps) {
                       </TableRow>
                     )
                   })}
+                  {filteredProducts.length == 0 && (
+                    <TableRow>
+                      <TableCell colSpan={9}>
+                        <div className="flex flex-col h-120 items-center justify-center py-10 text-muted-foreground">
+                          <PackageIcon className="mb-3 h-10 w-10 text-gray-400" />
+                          <p className="text-base font-medium">
+                            No products found
+                          </p>
+                          <p className="text-sm">
+                            No products found for transaction "{search}"
+                          </p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -221,7 +287,7 @@ function TransactionSection({ products }: TransactionSectionProps) {
                       Price
                     </Label>
                     <p className="text-lg font-semibold text-primary">
-                      &#8369; {selectedProduct.price.toFixed(2)}
+                      &#8369; {formatCurrency(selectedProduct.price)}
                     </p>
                   </div>
 
@@ -276,7 +342,7 @@ function TransactionSection({ products }: TransactionSectionProps) {
                     <div className="flex justify-between items-center">
                       <Label className="text-lg font-semibold">Total Amount</Label>
                       <p className="text-2xl font-bold text-primary">
-                        &#8369; {calculateTotal().toFixed(2)}
+                        &#8369; {formatCurrency(calculateTotal())}
                       </p>
                     </div>
                   </div>

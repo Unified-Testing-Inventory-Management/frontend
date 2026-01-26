@@ -37,7 +37,7 @@ export function SalesSection({ salesWithDetails }: SalesSectionProps) {
 
   return (
     <div className="space-y-4">
-      <Card className='h-150'>
+      <Card>
         <CardHeader>
           <CardTitle>Sales Overview</CardTitle>
           <CardDescription>Complete sales transaction history</CardDescription>
@@ -46,40 +46,67 @@ export function SalesSection({ salesWithDetails }: SalesSectionProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {["Sale ID", "User ID", "Products", "Category", "Quantity", "Total Amount", "Sale Date"].map((item) => (
-                  <TableHead key={item}>{item}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredSaleProduct.map((sale) => (
-                <TableRow key={sale.id}>
-                  <TableCell className="font-medium">{sale.id}</TableCell>
-                  <TableCell>{sale.userId}</TableCell>
-                  <TableCell>
-                    {sale.saleDetails.map((item, idx) => (
-                      <div key={idx} className="text-sm">
-                        {item.productName} (&#8369;{formatCurrency(item.price)})
-                      </div>
-                    ))}
-                  </TableCell>
-                  <TableCell>
-                    {sale.saleDetails.map((item) => (
-                      item.category
-                    ))}
-                  </TableCell>
-                  <TableCell>
-                    {sale.saleDetails.reduce((sum, item) => sum + item.quantity, 0)}
-                  </TableCell>
-                  <TableCell>&#8369;{formatCurrency(sale.totalAmount)}</TableCell>
-                  <TableCell>{formatDateTime(sale.saleDate)}</TableCell>
+          <div className="relative max-h-180 overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {[
+                    "Sale ID",
+                    "User ID",
+                    "Products",
+                    "Category",
+                    "Quantity",
+                    "Total Amount",
+                    "Sale Date",
+                  ].map((item) => (
+                    <TableHead
+                      key={item}
+                      className="sticky top-0 z-10 bg-white"
+                    >
+                      {item}
+                    </TableHead>
+                  ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredSaleProduct.map((sale) => (
+                  <TableRow key={sale.id}>
+                    <TableCell className="font-medium">{sale.id}</TableCell>
+                    <TableCell>{sale.userId}</TableCell>
+
+                    <TableCell>
+                      {sale.saleDetails.map((item, idx) => (
+                        <div key={idx} className="text-sm">
+                          {item.productName} (&#8369;{formatCurrency(item.price)})
+                        </div>
+                      ))}
+                    </TableCell>
+
+                    <TableCell>
+                      {sale.saleDetails.map((item, idx) => (
+                        <div key={idx}>{item.category}</div>
+                      ))}
+                    </TableCell>
+
+                    <TableCell>
+                      {sale.saleDetails.reduce(
+                        (sum, item) => sum + item.quantity,
+                        0
+                      )}
+                    </TableCell>
+
+                    <TableCell>
+                      &#8369;{formatCurrency(sale.totalAmount)}
+                    </TableCell>
+
+                    <TableCell>
+                      {formatDateTime(sale.saleDate)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
           <div>
             {salesWithDetails.length == 0 && (
               <div className="w-full h-90 mt-5 flex flex-col justify-center items-center gap-2 py-4">

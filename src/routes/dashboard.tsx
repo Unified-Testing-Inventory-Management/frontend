@@ -39,7 +39,7 @@ import { SettingsSection } from '@/components/dashboard/SettingsSection'
 import { useSaleDetails, useProductSales } from '@/data/dashboard-data'
 import { useProducts } from '@/data/dashboard-data'
 import { getStockAlertStatus } from '@/@types'
-import type { SaleWithDetails, StockAlert } from '@/@types'
+import type { SaleDetail, SaleWithDetails, StockAlert } from '@/@types'
 import { ProtectedRoute } from '@/middleware'
 import { useLogoutUserMutation, UserData } from '@/services/user_services'
 import { useQueryClient } from '@tanstack/react-query'
@@ -82,13 +82,13 @@ function RouteComponent() {
     })
   }
 
-  const salesWithDetails = sales.map((sale) => {
+  const salesWithDetails: SaleWithDetails[] = sales.map((sale) => {
     const details = saleDetails.filter((sd) => sd.id === sale.id)
     const saleItems = details.map((detail) => {
       const product = products.find((p) => p.id === detail.id)
       return {
         ...detail,
-        ProductName: product?.productName || 'Unknown Product',
+        productName: product?.productName || 'Unknown Product',
       }
     })
     return {

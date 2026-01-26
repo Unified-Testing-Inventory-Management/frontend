@@ -187,10 +187,7 @@ export function OverviewSection({
                       <ChartTooltipContent
                         formatter={(value) => {
                           const n = typeof value === 'number' ? value : Number(value)
-                          return `₱${Number.isNaN(n) ? value : n.toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                          })}`
+                          return `₱${Number.isNaN(n) ? value : formatCurrency(n)}`
                         }}
                       />
                     }
@@ -292,10 +289,7 @@ export function OverviewSection({
                               {sale.saleDetails.map((item) => item.productName).join(', ')}
                             </TableCell>
                             <TableCell>{sale.userId}</TableCell>
-                            <TableCell>&#8369;{sale.totalAmount.toLocaleString("en-Us", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}</TableCell>
+                            <TableCell>&#8369;{formatCurrency(sale.totalAmount)}</TableCell>
                             <TableCell>{formatDateTime(sale.saleDate)}</TableCell>
                           </TableRow>
                         ))
@@ -323,9 +317,9 @@ export function OverviewSection({
                   </p>
                 </div>
               ) : (
-                stockAlerts.map((alert) => (
+                stockAlerts.map((alert,index) => (
                   <div
-                    key={alert.id}
+                    key={index}
                     className="flex items-center justify-between"
                   >
                     <div className="space-y-1">

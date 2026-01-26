@@ -31,6 +31,13 @@ export type Product = {
   barCode: string
 }
 
+export type TransactionData = Omit<Product, "barCode" | "createdAt" | "id" | "image" | "stockQuantity"> & {
+  productId: string,
+  totalAmount: number,
+  quantity: number,
+  price: number
+}
+
 export type UpdateProductData = {
   id: string | number;
   data: Omit<Product, "id" | "createdAt" | "barCode" | "image">

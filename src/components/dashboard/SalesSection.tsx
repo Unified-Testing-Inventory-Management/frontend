@@ -8,32 +8,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import type { SaleWithDetails } from '@/@types'
 import { formatDateTime } from '@/utils/formatDateTime'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { Input } from '../ui/input'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
+import { useProductSales } from '@/data/dashboard-data'
 
-interface SalesSectionProps {
-  salesWithDetails: Array<SaleWithDetails>
-}
-
-export function SalesSection({ salesWithDetails }: SalesSectionProps) {
+export function SalesSection() {
   const [search, setSearch] = useState<string>("")
-
-  //Filtered product base on the search
-  const filteredSaleProduct = useMemo(() => {
-    const query = search.toLowerCase().trim()
-
-    if (!query) return salesWithDetails
-
-    return salesWithDetails.filter((sale) =>
-      sale.saleDetails.some((item) =>
-        item.productName?.toLowerCase().includes(query) ||
-        item.category?.toLowerCase().includes(query)
-      )
-    )
-  }, [search, salesWithDetails])
+  const { sales } = useProductSales()
 
   return (
     <div className="space-y-4">
@@ -69,7 +52,7 @@ export function SalesSection({ salesWithDetails }: SalesSectionProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSaleProduct.map((sale) => (
+                {sales.map((sale) => (
                   <TableRow key={sale.id}>
                     <TableCell className="font-medium">{sale.id}</TableCell>
                     <TableCell>{sale.userId}</TableCell>
@@ -108,7 +91,7 @@ export function SalesSection({ salesWithDetails }: SalesSectionProps) {
             </Table>
           </div>
           <div>
-            {salesWithDetails.length == 0 && (
+            {sales.length == 0 && (
               <div className="w-full h-90 mt-5 flex flex-col justify-center items-center gap-2 py-4">
                 <ShoppingCart className="h-8 w-8 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">
@@ -116,7 +99,7 @@ export function SalesSection({ salesWithDetails }: SalesSectionProps) {
                 </span>
               </div>
             )}
-            {filteredSaleProduct.length == 0 && (
+            {sales.length == 0 && (
               <div className="w-full h-90 mt-5 flex flex-col justify-center items-center gap-2 py-4">
                 <ShoppingCart className="h-8 w-8 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">

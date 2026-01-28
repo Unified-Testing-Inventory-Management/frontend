@@ -79,7 +79,7 @@ export function OverviewSection({
   const topSalesData = salesWithDetails
     .slice()
     .sort((a, b) => b.totalAmount - a.totalAmount)
-    .slice(0, 5)
+    .slice(0, 10)
     .map((sale) => ({
       sale: `#${sale.id}`,
       revenue: sale.totalAmount,
@@ -325,7 +325,7 @@ export function OverviewSection({
                     <div className="space-y-1">
                       <p className="text-sm font-medium">{alert.productName}</p>
                       <p className="text-xs text-muted-foreground">
-                        Current: {alert.current} | Min: {alert.min}
+                        Current: {alert.current} | Min: {alert.minimum}
                       </p>
                     </div>
                     <Badge

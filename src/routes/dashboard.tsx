@@ -39,7 +39,7 @@ import { SettingsSection } from '@/components/dashboard/SettingsSection'
 import { useSaleDetails, useProductSales } from '@/data/dashboard-data'
 import { useProducts } from '@/data/dashboard-data'
 import { getStockAlertStatus } from '@/@types'
-import type { SaleDetail, SaleWithDetails, StockAlert } from '@/@types'
+import type { SaleWithDetails, StockAlert } from '@/@types'
 import { ProtectedRoute } from '@/middleware'
 import { useLogoutUserMutation, UserData } from '@/services/user_services'
 import { useQueryClient } from '@tanstack/react-query'
@@ -98,12 +98,12 @@ function RouteComponent() {
   })
 
   const stockAlerts: StockAlert[] = products
-    .filter((p) => Number(p.stockQuantity) <= 10)
+    .filter((p) => Number(p.stockQuantity) <= 5)
     .map((p) => ({
       id: Number(p.id),
       productName: p.productName,
       current: Number(p.stockQuantity),
-      min: 5,
+      minimum: 5,
       status: getStockAlertStatus(p),
     }))
 
@@ -238,11 +238,11 @@ function RouteComponent() {
           )}
 
           {activeSection === 'products' && (
-            <ProductsSection products={products} />
+            <ProductsSection />
           )}
 
           {activeSection === 'sales' && (
-            <SalesSection salesWithDetails={salesWithDetails} />
+            <SalesSection />
           )}
 
           {activeSection === 'stocks' && (
@@ -256,7 +256,7 @@ function RouteComponent() {
           {activeSection === 'settings' && <SettingsSection />}
 
           {activeSection === 'transactions' && (
-            <TransactionSection products={products} />
+            <TransactionSection />
           )}
         </div>
       </SidebarInset>

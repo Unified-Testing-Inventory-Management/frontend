@@ -68,7 +68,7 @@ export type StockAlert = {
   id: number
   productName: string
   current: number
-  min: number
+  minimum: number
   status: 'Low' | 'Out'
 }
 

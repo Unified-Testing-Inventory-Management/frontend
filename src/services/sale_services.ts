@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { allProductSales, transactionProducts } from "@/api/sale_api";
+import { allProductSales, searchProductName, transactionProducts } from "@/api/sale_api";
 
 export const useAllProductSalesQuery = () => {
     return useQuery({
@@ -8,13 +8,22 @@ export const useAllProductSalesQuery = () => {
     })
 }
 
+export const useSearchSaleProducts = (searchTerm: string) => {
+    return useQuery({
+        queryFn: () => searchProductName(searchTerm),
+        queryKey: ["transactions", "search", searchTerm],
+        enabled: searchTerm.length > 0
+    })
+}
+
 export const useTransactionProduct = () => {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: transactionProducts,
         mutationKey: ["transactions"],
-        onSuccess: ()=> {
-            queryClient.invalidateQueries({queryKey: ["transactions"]})
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["transactions"] })
+            queryClient.invalidateQueries({ queryKey: ["products"] })
         }
     })
 }

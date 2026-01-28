@@ -10,6 +10,13 @@ export const allProductSales = async () => {
   return res.data;
 }
 
+export const searchProductName = async (searchTerm: string) => {
+  const res = await api.get("/api/v1/transactions", {
+    params: { productName: searchTerm }
+  });
+  return res.data;
+}
+
 export const transactionProducts = async ({ data }: transactionData) => {
   const res = await api.post("/api/v1/transactions", data);
   return res.data

@@ -5,7 +5,7 @@ import {
   PackageIcon,
   Plus,
 } from 'lucide-react'
-import { Activity, useMemo, useState } from 'react'
+import React, { Activity, useState, type FormEvent } from 'react'
 import type { Product } from '@/@types'
 import {
   Card,
@@ -43,12 +43,12 @@ import {
 import { Alert, AlertTitle } from '../ui/alert'
 import { formatDateTime } from '@/utils/formatDateTime'
 import { formatCurrency } from '@/utils/formatCurrency'
+import { useProducts } from '@/data/dashboard-data'
 
-interface ProductsSectionProps {
-  products: Array<Product>
-}
-
-export function ProductsSection({ products }: ProductsSectionProps) {
+export function ProductsSection() {
+  const [searchInput, setSearchInput] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const { products } = useProducts(searchTerm)
   const register = useRegisterProductMutation()
   const updateProduct = useUpdateProductMutation()
   const archive = useArchiveProductById()
@@ -62,7 +62,6 @@ export function ProductsSection({ products }: ProductsSectionProps) {
   const [isSuccess, setIsSuccess] = useState<boolean>(false)
   const [message, setMessage] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-  const [search, setSearch] = useState<string>("")
   const [productFormData, setProductFormData] = useState<
     Omit<Product, 'id' | 'createdAt' | 'barCode'>
   >({
@@ -229,17 +228,6 @@ export function ProductsSection({ products }: ProductsSectionProps) {
     })
   }
 
-  //Filtered product base on the search
-  const filteredProduct = useMemo(() => {
-    const query = search.toLowerCase().trim()
-
-    if(!query) return products
-    
-    return products.filter((product) =>
-      product.productName.toLowerCase().includes(query) ||
-      product.category.toLowerCase().includes(query))
-  }, [search, products])
-
   return (
     <>
       <Activity mode={isSuccess ? 'visible' : 'hidden'}>
@@ -268,9 +256,25 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                 <Plus className="mr-2 h-4 w-4" />
               </Button>
             </div>
-            <div className='w-sm'>
-              <Input className='py-6 px-4' placeholder='Search your product...' name='search' onChange={(e) => setSearch(e.target.value)} />
-            </div>
+            <form onSubmit={(e: FormEvent) => {
+              e.preventDefault()
+              setSearchTerm(searchInput)
+            }} method="post">
+              <div className='w-md flex flex-row gap-2'>
+                <Input
+                  className="py-6 px-4"
+                  placeholder="Search your product..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                />
+                <Button
+                  type='button'
+                  className="py-6 px-6"
+                >
+                  Search
+                </Button>
+              </div>
+            </form>
           </div>
         </CardHeader>
         <CardContent>
@@ -286,7 +290,7 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                 </TableHeader>
 
                 <TableBody>
-                  {filteredProduct.map((product) => {
+                  {products.map((product) => {
                     const status = getProductStatus(product)
                     return (
                       <TableRow key={product.id}>
@@ -365,7 +369,7 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                       </TableCell>
                     </TableRow>
                   )}
-                  {filteredProduct.length == 0 && (
+                  {products.length == 0 && (
                     <TableRow>
                       <TableCell colSpan={9}>
                         <div className="flex flex-col h-120 items-center justify-center py-10 text-muted-foreground">
@@ -374,7 +378,7 @@ export function ProductsSection({ products }: ProductsSectionProps) {
                             No products found
                           </p>
                           <p className="text-sm">
-                            No products found for "{search}"
+                            No products found for "{searchTerm}"
                           </p>
                         </div>
                       </TableCell>
@@ -481,7 +485,7 @@ export function ProductsSection({ products }: ProductsSectionProps) {
               >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <div className="w-full min-h-screen flex justify-center items-center">
                     <div className="loader-1"></div>

@@ -1,57 +1,34 @@
-import type { Product, Sale } from '@/@types'
-import { useAllProductsQuery } from '@/services/product_services'
-import { useAllProductSalesQuery } from '@/services/sale_services'
-import { useEffect, useState } from 'react'
+import type { Product, SaleDetail, SaleWithDetails } from './../@types/index';
+import { useAllProductsQuery, useSearchProducts } from '@/services/product_services'
+import { useAllProductSalesQuery, useSearchSaleProducts } from '@/services/sale_services'
 
-export const useProducts = () => {
-  const [products, setProducts] = useState<Product[] | []>([])
-  const { data, isLoading, error } = useAllProductsQuery()
+export const useProducts = (searchTerm?: string) => {
 
-  useEffect(() => {
-    setProducts(data?.data || [])
-  }, [data])
+  const query = searchTerm ? useSearchProducts(searchTerm) : useAllProductsQuery()
 
   return {
-    products,
-    isLoading,
-    error,
+    products: query.data?.data as Product[] || [],
+    isLoading: query.isLoading,
+    error: query.error,
   }
 }
 
-export const useProductSales = () => {
-  const [sales, setSales] = useState<Sale[] | []>([])
-  const { data, isLoading, error } = useAllProductSalesQuery();
-
-  useEffect(() => {
-    setSales(data?.data || [])
-  }, [data])
+export const useProductSales = (searchTerm?: string) => {
+  const query = searchTerm ? useSearchSaleProducts(searchTerm) : useAllProductSalesQuery();
 
   return {
-    sales,
-    isLoading,
-    error
+    sales: query.data?.data as SaleWithDetails[] || [],
+    isLoading: query.isLoading,
+    error: query?.error
   }
 }
 
 export const useSaleDetails = () => {
-  const [saleDetails, setSaleDetails] = useState<Sale[] | []>([])
-  const { data, isLoading, error } = useAllProductSalesQuery();
-
-  useEffect(() => {
-    setSaleDetails(data?.data.saleDetails || [])
-  }, [data])
+  const data = useAllProductSalesQuery();
 
   return {
-    saleDetails,
-    isLoading,
-    error
+    saleDetails: data.data?.data as SaleDetail[] || [],
+    isLoading: data.isLoading,
+    error: data.error
   }
 }
-
-// export const saleDetails: SaleDetail[] = [
-//   { id: 1, saleId: 1, productId: 1, quantity: 1, price: 1299.99 },
-//   { id: 2, saleId: 2, productId: 2, quantity: 1, price: 29.99 },
-//   { id: 3, saleId: 3, productId: 3, quantity: 1, price: 149.99 },
-//   { id: 4, saleId: 4, productId: 4, quantity: 1, price: 399.99 },
-//   { id: 5, saleId: 5, productId: 6, quantity: 1, price: 79.99 },
-// ]

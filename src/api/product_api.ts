@@ -12,12 +12,20 @@ export const getProductById = async (id: string) => {
   return res.data
 }
 
+export const searchProductName = async (searchTerm: string) => {
+  const res = await api.get('/api/v1/products/search', {
+    params: { productName: searchTerm }
+  })
+  return res.data
+}
+
+
 export const registerProduct = async (
   data: Omit<Product, 'id' | 'createdAt' | 'barCode'>,
 ) => {
 
   const form = new FormData()
-  
+
   form.append("productName", data.productName)
   form.append("category", data.category)
   form.append("price", String(data.price))
@@ -32,9 +40,9 @@ export const registerProduct = async (
 }
 
 export const updateProduct = async ({ id, data }: UpdateProductData) => {
-  
+
   const form = new FormData()
-  
+
   form.append("productName", data.productName)
   form.append("category", data.category)
   form.append("price", String(data.price))

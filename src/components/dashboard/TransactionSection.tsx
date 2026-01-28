@@ -1,4 +1,4 @@
-import React, { Activity, useMemo, useState } from 'react'
+import React, { Activity, useState, type FormEvent } from 'react'
 import type { Product, TransactionData } from '@/@types'
 import {
   Card,
@@ -32,20 +32,19 @@ import { CheckCircle2Icon, PackageIcon, ShoppingCart } from 'lucide-react'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { useTransactionProduct } from '@/services/sale_services'
 import { Alert, AlertTitle } from '../ui/alert'
+import { useProducts } from '@/data/dashboard-data'
 
-interface TransactionSectionProps {
-  products: Array<Product>
-}
-
-function TransactionSection({ products }: TransactionSectionProps) {
+function TransactionSection() {
   const transactionProduct = useTransactionProduct()
   const [message, setMessage] = useState<string>("")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [searchInput, setSearchInput] = useState("")
+  const { products } = useProducts(searchTerm)
   const [isSuccess, setIsSuccess] = useState<boolean>(false)
   const [isError, setIsError] = useState<boolean>(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
   const [quantity, setQuantity] = useState<number>(1)
-  const [search, setSearch] = useState<string>("")
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product)
@@ -100,20 +99,11 @@ function TransactionSection({ products }: TransactionSectionProps) {
         if (err.response) {
           setMessage(err.response?.data.error)
           setIsError(true)
+          console.log(isError)
         }
       }
     })
   }
-
-  const filteredProducts = useMemo(() => {
-    const query = search.toLowerCase().trim()
-
-    if (!query) return products
-
-    return products.filter((item) =>
-      item.productName.toLowerCase().includes(query)
-    )
-  }, [search, products])
 
   return (
     <>
@@ -134,7 +124,25 @@ function TransactionSection({ products }: TransactionSectionProps) {
             </CardDescription>
           </div>
           <div className='w-sm'>
-            <Input className="py-6 px-4" placeholder="Search product transaction..." onChange={(e) => setSearch(e.target.value)}></Input>
+            <form onSubmit={(e: FormEvent) => {
+              e.preventDefault()
+              setSearchTerm(searchInput)
+            }} method="post">
+              <div className='w-md flex flex-row gap-2'>
+                <Input
+                  className="py-6 px-4"
+                  placeholder="Search your product..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                />
+                <Button
+                  type='button'
+                  className="py-6 px-6"
+                >
+                  Search
+                </Button>
+              </div>
+            </form>
           </div>
         </CardHeader>
         <CardContent>
@@ -152,7 +160,7 @@ function TransactionSection({ products }: TransactionSectionProps) {
                 </TableHeader>
 
                 <TableBody>
-                  {filteredProducts.map((product) => {
+                  {products.map((product) => {
                     const status = getProductStatus(product)
                     return (
                       <TableRow
@@ -199,7 +207,7 @@ function TransactionSection({ products }: TransactionSectionProps) {
                       </TableRow>
                     )
                   })}
-                  {filteredProducts.length == 0 && (
+                  {products.length == 0 && (
                     <TableRow>
                       <TableCell colSpan={9}>
                         <div className="flex flex-col h-120 items-center justify-center py-10 text-muted-foreground">
@@ -208,7 +216,7 @@ function TransactionSection({ products }: TransactionSectionProps) {
                             No products found
                           </p>
                           <p className="text-sm">
-                            No products found for transaction "{search}"
+                            No products found for transaction "{searchTerm}"
                           </p>
                         </div>
                       </TableCell>

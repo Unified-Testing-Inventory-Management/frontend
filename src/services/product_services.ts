@@ -5,6 +5,7 @@ import {
   getProductById,
   archiveProduct,
   updateProduct,
+  searchProductName
 } from '@/api/product_api'
 
 export const useRegisterProductMutation = () => {
@@ -30,6 +31,15 @@ export const useGetProductById = (id: string) => {
   return useQuery({
     queryKey: ['products', id],
     queryFn: () => getProductById(id),
+  })
+}
+
+
+export const useSearchProducts = (searchTerm: string) => {
+  return useQuery({
+    queryKey: ['products', 'search', searchTerm], // unique cache per searchTerm
+    queryFn: () => searchProductName(searchTerm),
+    enabled: searchTerm.length > 0,
   })
 }
 

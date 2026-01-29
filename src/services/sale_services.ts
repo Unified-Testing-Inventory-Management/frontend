@@ -5,6 +5,7 @@ export const useAllProductSalesQuery = () => {
     return useQuery({
         queryFn: allProductSales,
         queryKey: ["transactions"],
+        staleTime: 1000 * 60
     })
 }
 

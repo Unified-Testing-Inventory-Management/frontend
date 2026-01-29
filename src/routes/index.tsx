@@ -4,6 +4,7 @@ import { Register } from '@/components/Register'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Eye, EyeClosed } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -27,6 +28,7 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [registerOpen, setRegisterOpen] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
+  const [isShowPassword, setIsShowPassword] = useState<boolean>(false)
   const [formData, setFormData] = useState<TLoginUserData>({
     username: '',
     password: '',
@@ -93,23 +95,30 @@ function App() {
                 required
                 autoFocus
                 placeholder="Enter your username"
-                className={`${error ? 'ring-2 ring-red-500' : ''}`}
+                className={`${error && 'ring-2 ring-red-500'}`}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                placeholder="Enter your password"
-                className={`${error ? 'ring-2 ring-red-500' : ''}`}
-              />
+            <div className="relative">
+              <div className='space-y-2'>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type={isShowPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your password"
+                  className={`${error && 'ring-2 ring-red-500'}`}
+                />
+              </div>
+              {formData.password.length > 0 && (
+                isShowPassword ? <Eye onClick={() => setIsShowPassword(false)} className='text-gray-300 text-sm absolute top-7 right-2.5' /> :
+                  <EyeClosed onClick={() => setIsShowPassword(true)} className='text-gray-300 text-sm absolute top-7 right-2.5' />
+              )
+              }
             </div>
-            <Button type="submit" className="w-full">
+            <Button variant={`${formData.username.length && formData.password.length > 0 ? "default" : "secondary"}`} type="submit" className="w-full">
               {isSubmitting ? (
                 <div className="w-full min-h-screen flex justify-center items-center">
                   <div className="loader-1"></div>
@@ -125,7 +134,7 @@ function App() {
               <Button
                 type="button"
                 variant="link"
-                className="p-0 h-auto font-semibold"
+                className=" p-0 h-auto font-semibold"
                 onClick={() => setRegisterOpen(true)}
               >
                 Register

@@ -43,7 +43,7 @@ import {
 import { Alert, AlertTitle } from '../ui/alert'
 import { formatDateTime } from '@/utils/formatDateTime'
 import { formatCurrency } from '@/utils/formatCurrency'
-import { useProducts } from '@/data/dashboard-data'
+import { useProducts } from '@/data'
 
 export function ProductsSection() {
   const [searchInput, setSearchInput] = useState<string>('');
@@ -135,14 +135,14 @@ export function ProductsSection() {
   }
 
   // Submit Product Created
-  const handleProductSubmit = (e: React.FormEvent) => {
+  const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setIsError(false)
     setIsSuccess(false)
     setMessage('')
 
-    register.mutate(productFormData, {
+    await register.mutateAsync(productFormData, {
       onSuccess: (data) => {
         setIsSuccess(true)
         setMessage(data.message)
@@ -174,13 +174,12 @@ export function ProductsSection() {
   }
 
   // Update Product By Id
-  const handleUpdateProduct = (e: React.FormEvent) => {
+  const handleUpdateProduct = async (e: React.FormEvent) => {
     e.preventDefault()
-    setMessage("")
 
     if (!productId) return
 
-    updateProduct.mutate(
+    await updateProduct.mutateAsync(
       { id: productId as string, data: editProductData },
       {
         onSuccess: (data) => {
@@ -209,9 +208,9 @@ export function ProductsSection() {
   }
 
   // Archive Product
-  const handleArchiveProduct = (e: React.FormEvent) => {
+  const handleArchiveProduct = async (e: React.FormEvent) => {
     e.preventDefault()
-    archive.mutate(productId, {
+    await archive.mutateAsync(productId, {
       onSuccess: (data) => {
         setIsSuccess(true)
         setMessage(data.message)
@@ -232,7 +231,7 @@ export function ProductsSection() {
     <>
       <Activity mode={isSuccess ? 'visible' : 'hidden'}>
         <Alert className="animate-fade-in-out bg-green-500 w-70 absolute right-2 top-4">
-          <CheckCircle2Icon className="bg-green-500 text-green-500" />
+          <CheckCircle2Icon color='white' />
           <AlertTitle>
             <span className="text-white text-[16px] font-bold">{message}</span>
           </AlertTitle>
@@ -278,8 +277,8 @@ export function ProductsSection() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="relative max-h-160 overflow-hidden">
-            <div className="max-h-176 overflow-y-auto">
+          <div className="relative min-h-150 overflow-hidden">
+            <div className="max-h-150 overflow-y-auto">
               <Table className="w-full">
                 <TableHeader className="sticky top-0 bg-white z-10">
                   <TableRow>
@@ -340,13 +339,13 @@ export function ProductsSection() {
                         <TableCell>{formatDateTime(product.createdAt)}</TableCell>
                         <TableCell>
                           <div className="flex flex-row gap-1.5">
-                            <EditIcon className="text-shadow-blue-500" onClick={() => { handleOpenEditModal(product) }} />
+                            <EditIcon className="text-blue-500 hover:text-blue-700" onClick={() => { handleOpenEditModal(product) }} />
                             <ArchiveIcon
                               onClick={() => {
                                 setIsArchiveModalOpen(true)
                                 setProductId(product.id)
                               }}
-                              className="text-orange-500"
+                              className="text-orange-500 hover:text-orange-700"
                             />
                           </div>
                         </TableCell>
@@ -364,21 +363,6 @@ export function ProductsSection() {
                           <p className="text-sm">
                             Click &quot;Add Product&quot; to create your first
                             item.
-                          </p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {products.length == 0 && (
-                    <TableRow>
-                      <TableCell colSpan={9}>
-                        <div className="flex flex-col h-120 items-center justify-center py-10 text-muted-foreground">
-                          <PackageIcon className="mb-3 h-10 w-10 text-gray-400" />
-                          <p className="text-base font-medium">
-                            No products found
-                          </p>
-                          <p className="text-sm">
-                            No products found for "{searchTerm}"
                           </p>
                         </div>
                       </TableCell>
@@ -609,7 +593,7 @@ export function ProductsSection() {
           <DialogHeader>
             <DialogTitle>Archive Item</DialogTitle>
             <DialogDescription>
-              Do you want to archive this item ?
+              Are you sure you want to archive this item? You can restore it later if needed.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

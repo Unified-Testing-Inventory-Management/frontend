@@ -31,6 +31,15 @@ export type Product = {
   barCode: string
 }
 
+export type ArchiveProductsData = Product & {
+  productId: string,
+  userId: string
+  category: string,
+  price: number,
+  stockQuantity: number,
+  deletedAt: string
+}
+
 export type TransactionData = Omit<Product, "barCode" | "createdAt" | "id" | "image" | "stockQuantity"> & {
   productId: string,
   totalAmount: number,

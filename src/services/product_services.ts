@@ -5,7 +5,10 @@ import {
   getProductById,
   archiveProduct,
   updateProduct,
-  searchProductName
+  searchProductName,
+  getAllArchiveProducts,
+  restoreProduct,
+  deleteProduct
 } from '@/api/product_api'
 
 export const useRegisterProductMutation = () => {
@@ -24,6 +27,7 @@ export const useAllProductsQuery = () => {
   return useQuery({
     queryKey: ['products'],
     queryFn: getAllProducts,
+    staleTime: 1000 * 60,
   })
 }
 
@@ -37,7 +41,7 @@ export const useGetProductById = (id: string) => {
 
 export const useSearchProducts = (searchTerm: string) => {
   return useQuery({
-    queryKey: ['products', 'search', searchTerm], // unique cache per searchTerm
+    queryKey: ['products', 'search', searchTerm],
     queryFn: () => searchProductName(searchTerm),
     enabled: searchTerm.length > 0,
   })
@@ -57,11 +61,47 @@ export const useUpdateProductMutation = () => {
 
 export const useArchiveProductById = () => {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: archiveProduct,
     mutationKey: ['products'],
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['archive'] })
     },
+  })
+}
+
+export const useRestoreProductById = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: restoreProduct,
+    mutationKey: ["restore"],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['archive'] })
+    },
+  })
+}
+
+export const useDeleteProductById = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: deleteProduct,
+    mutationKey: ["archive"],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['archive'] })
+    },
+  })
+}
+
+export const useAllArchivesProducts = () => {
+  return useQuery({
+    queryFn: getAllArchiveProducts,
+    queryKey: ['archive'],
+    staleTime: 1000 * 60,
   })
 }

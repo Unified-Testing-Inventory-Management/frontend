@@ -12,7 +12,7 @@ import { formatDateTime } from '@/utils/formatDateTime'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { Input } from '../ui/input'
 import { useState } from 'react'
-import { useProductSales } from '@/data/dashboard-data'
+import { useProductSales } from '@/data'
 
 export function SalesSection() {
   const [search, setSearch] = useState<string>("")
@@ -23,7 +23,7 @@ export function SalesSection() {
       <Card>
         <CardHeader>
           <CardTitle>Sales Overview</CardTitle>
-          <CardDescription>Complete sales transaction history</CardDescription>
+          <CardDescription className='-mt-1'>Complete sales transaction history</CardDescription>
           <div className='w-sm'>
             <Input className='py-6 px-4' placeholder='Search product sale...' onChange={(e) => setSearch(e.target.value)}></Input>
           </div>
@@ -96,14 +96,6 @@ export function SalesSection() {
                 <ShoppingCart className="h-8 w-8 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">
                   Don't have sales right now.
-                </span>
-              </div>
-            )}
-            {sales.length == 0 && (
-              <div className="w-full h-90 mt-5 flex flex-col justify-center items-center gap-2 py-4">
-                <ShoppingCart className="h-8 w-8 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  No products found for "{search}"
                 </span>
               </div>
             )}

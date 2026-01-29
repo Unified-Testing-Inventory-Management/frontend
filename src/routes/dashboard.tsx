@@ -8,7 +8,8 @@ import {
   Users,
   User,
   LogOut,
-  Activity
+  Activity,
+  ArchiveIcon
 } from 'lucide-react'
 import {
   Sidebar,
@@ -36,14 +37,15 @@ import { ProductsSection } from '@/components/dashboard/ProductsSection'
 import { SalesSection } from '@/components/dashboard/SalesSection'
 import { StocksSection } from '@/components/dashboard/StocksSection'
 import { SettingsSection } from '@/components/dashboard/SettingsSection'
-import { useSaleDetails, useProductSales } from '@/data/dashboard-data'
-import { useProducts } from '@/data/dashboard-data'
+import { useSaleDetails, useProductSales } from '@/data'
+import { useProducts } from '@/data'
 import { getStockAlertStatus } from '@/@types'
 import type { SaleWithDetails, StockAlert } from '@/@types'
 import { ProtectedRoute } from '@/middleware'
 import { useLogoutUserMutation, UserData } from '@/services/user_services'
 import { useQueryClient } from '@tanstack/react-query'
 import TransactionSection from '@/components/dashboard/TransactionSection'
+import ArchiveSection from '@/components/dashboard/ArchiveSection'
 
 export const Route = createFileRoute('/dashboard')({
   component: () => (
@@ -55,7 +57,7 @@ export const Route = createFileRoute('/dashboard')({
 
 function RouteComponent() {
   const [activeSection, setActiveSection] = useState<
-    'overview' | 'products' | 'sales' | 'stocks' | 'settings' | 'transactions'
+    'overview' | 'products' | 'sales' | 'stocks' | 'settings' | 'transactions' | 'archive'
   >('overview')
   const { open: sidebarOpen } = React.useContext(SidebarContext)
   const user = UserData()
@@ -126,6 +128,9 @@ function RouteComponent() {
     { icon: Activity, label: 'Transactions', value: 'transactions' },
   ]
 
+  const othersItem = [
+    { icon: ArchiveIcon, label: "Archive", value: "archive" }
+  ]
   return (
     <SidebarProvider>
       <Sidebar className="border-r w-52">
@@ -146,6 +151,24 @@ function RouteComponent() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {menuItems.map((item) => (
+                  <SidebarMenuItem key={item.value}>
+                    <SidebarMenuButton
+                      onClick={() => setActiveSection(item.value as any)}
+                      isActive={activeSection === item.value}
+                    >
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Others</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {othersItem.map((item) => (
                   <SidebarMenuItem key={item.value}>
                     <SidebarMenuButton
                       onClick={() => setActiveSection(item.value as any)}
@@ -221,6 +244,7 @@ function RouteComponent() {
               {activeSection === 'stocks' && 'Stock Management'}
               {activeSection === 'settings' && 'My Account'}
               {activeSection === 'transactions' && 'Transactions'}
+              {activeSection === 'archive' && 'Archive Management'}
             </h1>
           </div>
         </header>
@@ -258,6 +282,8 @@ function RouteComponent() {
           {activeSection === 'transactions' && (
             <TransactionSection />
           )}
+
+          {activeSection === 'archive' && (<ArchiveSection />)}
         </div>
       </SidebarInset>
     </SidebarProvider>

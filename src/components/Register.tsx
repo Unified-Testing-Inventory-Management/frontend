@@ -29,11 +29,11 @@ export function Register({ open, onOpenChange }: RegisterProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     console.log('Register:', formData)
 
-    register.mutate(formData,{
-      onSuccess: ()=> {
+    register.mutate(formData, {
+      onSuccess: () => {
         onOpenChange(false)
         setFormData({
           firstName: "",
@@ -43,13 +43,13 @@ export function Register({ open, onOpenChange }: RegisterProps) {
           role: ""
         });
       },
-      onError: (err:any)=> {
-        if(err.response){
+      onError: (err: any) => {
+        if (err.response) {
           console.log(err.response?.data.error);
         }
       }
     })
-    
+
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,7 +62,7 @@ export function Register({ open, onOpenChange }: RegisterProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-130">
         <DialogHeader>
           <DialogTitle>Register for Inventory System</DialogTitle>
           <DialogDescription>
@@ -127,7 +127,7 @@ export function Register({ open, onOpenChange }: RegisterProps) {
             >
               Cancel
             </Button>
-            <Button type="submit">Register</Button>
+            <Button variant={`${formData.firstName.length && formData.lastName.length && formData.username.length && formData.password.length > 0 ? "default" : "secondary"}`} type="submit">Register</Button>
           </div>
         </form>
       </DialogContent>

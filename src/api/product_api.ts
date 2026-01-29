@@ -19,7 +19,6 @@ export const searchProductName = async (searchTerm: string) => {
   return res.data
 }
 
-
 export const registerProduct = async (
   data: Omit<Product, 'id' | 'createdAt' | 'barCode'>,
 ) => {
@@ -54,5 +53,20 @@ export const updateProduct = async ({ id, data }: UpdateProductData) => {
 
 export const archiveProduct = async (id: string | number | null) => {
   const res = await api.delete(`/api/v1/products/${id}`)
+  return res.data
+}
+
+export const restoreProduct = async (id: string | number | null) => {
+  const res = await api.delete(`/api/v1/products/archive/${id}/restore`)
+  return res.data
+}
+
+export const deleteProduct = async (id: string | number | null) => {
+  const res = await api.delete(`/api/v1/products/archive/${id}`)
+  return res.data
+}
+
+export const getAllArchiveProducts = async () => {
+  const res = await api.get("/api/v1/products/archive");
   return res.data
 }

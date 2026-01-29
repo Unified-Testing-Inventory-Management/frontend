@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { StocksSection } from '@/components/dashboard/StocksSection'
-import { useProducts } from '@/data/dashboard-data'
+import { useProducts } from '@/data'
 import type { Product } from '@/@types'
 
 export const Route = createFileRoute('/stocks')({

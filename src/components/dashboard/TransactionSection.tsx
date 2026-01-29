@@ -32,7 +32,7 @@ import { CheckCircle2Icon, PackageIcon, ShoppingCart } from 'lucide-react'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { useTransactionProduct } from '@/services/sale_services'
 import { Alert, AlertTitle } from '../ui/alert'
-import { useProducts } from '@/data/dashboard-data'
+import { useProducts } from '@/data'
 
 function TransactionSection() {
   const transactionProduct = useTransactionProduct()
@@ -81,8 +81,6 @@ function TransactionSection() {
       quantity: quantity,
       price: Number(selectedProduct?.price)
     }
-
-    console.log('Transaction:', transactionDetails)
 
     await transactionProduct.mutateAsync({ data: transactionDetails }, {
       onSuccess: (data: any) => {
@@ -227,16 +225,6 @@ function TransactionSection() {
             </div>
           </div>
           <div>
-            {products.length == 0 ? (
-              <div className="w-full h-90 mt-5 flex flex-col justify-center items-center gap-2 py-4">
-                <ShoppingCart className="h-8 w-8 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  Don't have products to transaction right now.
-                </span>
-              </div>
-            ) : (
-              ''
-            )}
           </div>
         </CardContent>
       </Card>

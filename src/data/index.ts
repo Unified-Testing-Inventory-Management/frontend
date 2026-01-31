@@ -1,5 +1,5 @@
 import type { ArchiveProductsData, Product, SaleDetail, SaleWithDetails } from '../@types/index';
-import { useAllArchivesProducts, useAllProductsQuery, useSearchProducts } from '@/services/product_services'
+import { useAllArchivesProducts, useAllProductsQuery, useSearchArchiveProduct, useSearchProducts } from '@/services/product_services'
 import { useAllProductSalesQuery, useSearchSaleProducts } from '@/services/sale_services'
 
 export const useProducts = (searchTerm?: string) => {
@@ -17,28 +17,18 @@ export const useProductSales = (searchTerm?: string) => {
   const query = searchTerm ? useSearchSaleProducts(searchTerm) : useAllProductSalesQuery();
 
   return {
-    sales: query.data?.data as SaleWithDetails[] || [],
+    sales: query.data?.data as SaleWithDetails[] & SaleDetail[] || [],
     isLoading: query.isLoading,
     error: query?.error
   }
 }
 
-export const useSaleDetails = () => {
-  const data = useAllProductSalesQuery();
+export const useAllArchiveProducts = (searchTerm?: string) => {
+  const query = searchTerm ? useSearchArchiveProduct(searchTerm) : useAllArchivesProducts()
 
   return {
-    saleDetails: data.data?.data as SaleDetail[] || [],
-    isLoading: data.isLoading,
-    error: data.error
-  }
-}
-
-export const useAllArchiveProducts = () => {
-  const data = useAllArchivesProducts()
-
-  return {
-    archives: data.data?.data as ArchiveProductsData[] || [],
-    isLoading: data.isLoading,
-    error: data.error
+    archives: query.data?.data as ArchiveProductsData[] || [],
+    isLoading: query.isLoading,
+    error: query.error
   }
 }

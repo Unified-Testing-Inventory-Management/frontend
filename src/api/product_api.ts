@@ -56,6 +56,11 @@ export const archiveProduct = async (id: string | number | null) => {
   return res.data
 }
 
+export const searchArchiveProductName = async (searchTerm: string) => {
+  const res = await api.get('/api/v1/products/archive/search', { params: { productName: searchTerm } })
+  return res.data
+}
+
 export const restoreProduct = async (id: string | number | null) => {
   const res = await api.delete(`/api/v1/products/archive/${id}/restore`)
   return res.data

@@ -13,10 +13,12 @@ import { formatCurrency } from '@/utils/formatCurrency'
 import { Input } from '../ui/input'
 import { useState } from 'react'
 import { useProductSales } from '@/data'
+import { Button } from '../ui/button'
 
 export function SalesSection() {
-  const [search, setSearch] = useState<string>("")
-  const { sales } = useProductSales()
+  const [searchInput, setSearchInput] = useState<string>("")
+  const [searchTerm, setSearchTerm] = useState<string>("")
+  const { sales } = useProductSales(searchTerm)
 
   return (
     <div className="space-y-4">
@@ -24,9 +26,19 @@ export function SalesSection() {
         <CardHeader>
           <CardTitle>Sales Overview</CardTitle>
           <CardDescription className='-mt-1'>Complete sales transaction history</CardDescription>
-          <div className='w-sm'>
-            <Input className='py-6 px-4' placeholder='Search product sale...' onChange={(e) => setSearch(e.target.value)}></Input>
-          </div>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            setSearchTerm(searchInput)
+          }} method="post">
+            <div className='flex flex-row gap-2'>
+              <div className='w-sm'>
+                <Input className='py-6 px-4' placeholder='Search product sale...' onChange={(e) => setSearchInput(e.target.value)} />
+              </div>
+              <Button className='py-6 px-6'>
+                Search
+              </Button>
+            </div>
+          </form>
         </CardHeader>
         <CardContent>
           <div className="relative max-h-180 overflow-y-auto">

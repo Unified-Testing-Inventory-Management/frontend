@@ -107,7 +107,7 @@ function TransactionSection() {
     <>
       <Activity mode={isSuccess ? 'visible' : 'hidden'}>
         <Alert className="animate-fade-in-out bg-green-500 w-70 absolute right-2 top-4">
-          <CheckCircle2Icon className="bg-green-500 text-green-500" />
+          <CheckCircle2Icon color='white' />
           <AlertTitle>
             <span className="text-white text-[16px] font-bold">{message}</span>
           </AlertTitle>

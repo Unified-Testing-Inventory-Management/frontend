@@ -1,4 +1,4 @@
-import { ArchiveRestoreIcon, CheckCircle2Icon, Trash2Icon } from "lucide-react";
+import { ArchiveRestoreIcon, CheckCircle2Icon, PackageIcon, Trash2Icon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { useAllArchiveProducts } from "@/data";
@@ -9,9 +9,12 @@ import { Activity, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Alert, AlertTitle } from "../ui/alert";
+import { Input } from "../ui/input";
 
 export default function ArchiveSection() {
-  const { archives } = useAllArchiveProducts()
+  const [searchInput, setSearchInput] = useState<string>("")
+  const [searchTerm, setSearchTerm] = useState<string>("")
+  const { archives } = useAllArchiveProducts(searchTerm)
   const restoreProduct = useRestoreProductById()
   const deleteProduct = useDeleteProductById()
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -85,6 +88,20 @@ export default function ArchiveSection() {
               <CardDescription>Manage your archive products</CardDescription>
             </div>
           </div>
+          <form onSubmit={(e: React.FormEvent) => {
+            e.preventDefault()
+            setSearchTerm(searchInput)
+          }} method="post">
+            <div className="w-md flex flex-row gap-2">
+              <Input placeholder="Search archive product..." className="py-6 px-4" onChange={(e) => setSearchInput(e.target.value)} />
+              <Button
+                type='button'
+                className="py-6 px-6"
+              >
+                Search
+              </Button>
+            </div>
+          </form>
         </CardHeader>
         <CardContent>
           <div className="relative min-h-150 overflow-hidden">
@@ -133,6 +150,18 @@ export default function ArchiveSection() {
                         </TableCell>
                       </TableRow>
                     ))}
+                    {archives.length == 0 && (
+                      <TableRow>
+                        <TableCell colSpan={9}>
+                          <div className="flex flex-col h-120 items-center justify-center py-10 text-muted-foreground">
+                            <PackageIcon className="mb-3 h-10 w-10 text-gray-400" />
+                            <p className="text-base font-medium">
+                              No archived products found. Products you archive will appear here.
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>

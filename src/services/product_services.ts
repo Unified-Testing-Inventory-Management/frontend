@@ -8,7 +8,8 @@ import {
   searchProductName,
   getAllArchiveProducts,
   restoreProduct,
-  deleteProduct
+  deleteProduct,
+  searchArchiveProductName
 } from '@/api/product_api'
 
 export const useRegisterProductMutation = () => {
@@ -59,6 +60,14 @@ export const useUpdateProductMutation = () => {
   })
 }
 
+export const useSearchArchiveProduct = (searchTerm: string) => {
+  return useQuery({
+    queryKey: ['archive', 'search'],
+    queryFn: () => searchArchiveProductName(searchTerm),
+    enabled: searchTerm.length > 0
+  })
+}
+
 export const useArchiveProductById = () => {
   const queryClient = useQueryClient()
 
@@ -74,7 +83,7 @@ export const useArchiveProductById = () => {
 
 export const useRestoreProductById = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: restoreProduct,
     mutationKey: ["restore"],
@@ -87,7 +96,7 @@ export const useRestoreProductById = () => {
 
 export const useDeleteProductById = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: deleteProduct,
     mutationKey: ["archive"],

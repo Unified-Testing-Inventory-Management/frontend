@@ -37,7 +37,7 @@ import { ProductsSection } from '@/components/dashboard/ProductsSection'
 import { SalesSection } from '@/components/dashboard/SalesSection'
 import { StocksSection } from '@/components/dashboard/StocksSection'
 import { SettingsSection } from '@/components/dashboard/SettingsSection'
-import { useSaleDetails, useProductSales } from '@/data'
+import { useProductSales } from '@/data'
 import { useProducts } from '@/data'
 import { getStockAlertStatus } from '@/@types'
 import type { SaleWithDetails, StockAlert } from '@/@types'
@@ -66,7 +66,6 @@ function RouteComponent() {
   const queryClient = useQueryClient()
   const { products } = useProducts()
   const { sales } = useProductSales();
-  const { saleDetails } = useSaleDetails()
 
   const handleLogout = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -85,7 +84,7 @@ function RouteComponent() {
   }
 
   const salesWithDetails: SaleWithDetails[] = sales.map((sale) => {
-    const details = saleDetails.filter((sd) => sd.id === sale.id)
+    const details = sales.filter((sd) => sd.id === sale.id)
     const saleItems = details.map((detail) => {
       const product = products.find((p) => p.id === detail.id)
       return {
@@ -233,7 +232,7 @@ function RouteComponent() {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset
-        className={`transition-[margin] duration-300 ease-linear ${sidebarOpen ? 'lg:ml-[var(--sidebar-width)]' : 'lg:ml-[var(--sidebar-width-icon)]'}`}
+        className={`transition-[margin] duration-300 ease-linear ${sidebarOpen ? 'lg:ml-[var(--sidebar-width)]' : 'lg:ml-[var(--sidebar-width)]'}`}
       >
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <div className="flex flex-1 items-center gap-2">

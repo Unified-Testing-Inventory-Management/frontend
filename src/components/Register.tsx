@@ -23,7 +23,7 @@ export function Register({ open, onOpenChange }: RegisterProps) {
     lastName: "",
     username: "",
     password: "",
-    role: "Owner"
+    role: "Admin"
   })
   const register = useRegisterUserMutation();
 

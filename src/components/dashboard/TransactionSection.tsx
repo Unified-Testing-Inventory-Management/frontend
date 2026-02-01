@@ -28,7 +28,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { getProductStatus } from '@/@types'
-import { CheckCircle2Icon, PackageIcon, ShoppingCart } from 'lucide-react'
+import { CheckCircle2Icon, PackageIcon } from 'lucide-react'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { useTransactionProduct } from '@/services/sale_services'
 import { Alert, AlertTitle } from '../ui/alert'
@@ -163,7 +163,7 @@ function TransactionSection() {
                     return (
                       <TableRow
                         key={product.id}
-                        onClick={() => handleProductClick(product)}
+                        onClick={() => product.stockQuantity > 0 ? handleProductClick(product) : null}
                         className="cursor-pointer hover:bg-muted/50"
                       >
                         <TableCell>

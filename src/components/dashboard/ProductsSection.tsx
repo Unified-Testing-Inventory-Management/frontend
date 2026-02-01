@@ -4,8 +4,9 @@ import {
   EditIcon,
   PackageIcon,
   Plus,
+  Search,
 } from 'lucide-react'
-import React, { Activity, useState, type FormEvent } from 'react'
+import React, { Activity, useMemo, useState, type FormEvent } from 'react'
 import type { Product } from '@/@types'
 import {
   Card,
@@ -44,6 +45,9 @@ import { Alert, AlertTitle } from '../ui/alert'
 import { formatDateTime } from '@/utils/formatDateTime'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { useProducts } from '@/data'
+import FilteredByStatus from '../FilteredByStatus'
+
+type FilterStatus = 'All' | 'In Stock' | 'Low Stock' | 'Out of Stock'
 
 export function ProductsSection() {
   const [searchInput, setSearchInput] = useState<string>('');
@@ -52,6 +56,7 @@ export function ProductsSection() {
   const register = useRegisterProductMutation()
   const updateProduct = useUpdateProductMutation()
   const archive = useArchiveProductById()
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('All')
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isEditProductModalOpen, setIsEditProductModalOpen] = useState<boolean>(false)
   const [isArchiveModalOpen, setIsArchiveModalOpen] = useState<boolean>(false)
@@ -227,6 +232,15 @@ export function ProductsSection() {
     })
   }
 
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      if (filterStatus === 'All') return true
+      return getProductStatus(product) === filterStatus
+    })
+  }, [products, filterStatus])
+
+  const totalFiltered = filteredProducts.length
+
   return (
     <>
       <Activity mode={isSuccess ? 'visible' : 'hidden'}>
@@ -255,25 +269,44 @@ export function ProductsSection() {
                 <Plus className="mr-2 h-4 w-4" />
               </Button>
             </div>
-            <form onSubmit={(e: FormEvent) => {
-              e.preventDefault()
-              setSearchTerm(searchInput)
-            }} method="post">
-              <div className='w-md flex flex-row gap-2'>
-                <Input
-                  className="py-6 px-4"
-                  placeholder="Search your product..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                />
-                <Button
-                  type='button'
-                  className="py-6 px-6"
-                >
-                  Search
-                </Button>
+            <div className='flex flex-col gap-2'>
+              <div>
+                <form onSubmit={(e: FormEvent) => {
+                  e.preventDefault()
+                  setSearchTerm(searchInput)
+                }} method="post">
+                  <div className='w-md flex flex-row gap-2'>
+                    <Input
+                      className="py-6 px-4"
+                      placeholder="Search your product..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                    />
+                    <Button
+                      type='button'
+                      className="py-6 px-6 hidden md:flex"
+                    >
+                      Search
+                    </Button>
+                    <Button
+                      type='button'
+                      className="py-6 px-6 md:hidden"
+                    >
+                      <Search />
+                    </Button>
+                  </div>
+                </form>
               </div>
-            </form>
+              <div className='mt-2 -mb-5'>
+                <FilteredByStatus
+                  filterStatus={filterStatus}
+                  setFilterStatus={setFilterStatus}
+                  totalFiltered={totalFiltered}
+                />
+              </div>
+            </div>
+          </div>
+          <div>
           </div>
         </CardHeader>
         <CardContent>
@@ -289,7 +322,7 @@ export function ProductsSection() {
                 </TableHeader>
 
                 <TableBody>
-                  {products.map((product) => {
+                  {filteredProducts.map((product) => {
                     const status = getProductStatus(product)
                     return (
                       <TableRow key={product.id}>

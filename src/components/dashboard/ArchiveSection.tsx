@@ -5,11 +5,16 @@ import { useAllArchiveProducts } from "@/data";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { formatDateTime } from "@/utils/formatDateTime";
 import { useDeleteProductById, useRestoreProductById } from "@/services/product_services";
-import { Activity, useState } from "react";
+import { Activity, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Alert, AlertTitle } from "../ui/alert";
 import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
+import { getProductStatus } from "@/@types";
+import FilteredByStatus from "../FilteredByStatus";
+
+type FilterStatus = 'All' | 'In Stock' | 'Low Stock' | 'Out of Stock'
 
 export default function ArchiveSection() {
   const [searchInput, setSearchInput] = useState<string>("")
@@ -17,6 +22,7 @@ export default function ArchiveSection() {
   const { archives } = useAllArchiveProducts(searchTerm)
   const restoreProduct = useRestoreProductById()
   const deleteProduct = useDeleteProductById()
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('All')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState<boolean>(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false)
@@ -68,6 +74,16 @@ export default function ArchiveSection() {
     })
   }
 
+  const filteredProducts = useMemo(() => {
+    return archives.filter((product) => {
+      if (filterStatus === 'All') return true
+      return getProductStatus(product) === filterStatus
+    })
+  }, [archives, filterStatus])
+
+  const totalFiltered = filteredProducts.length
+
+
   return (
     <>
       <Activity mode={isSuccess ? 'visible' : 'hidden'}>
@@ -88,20 +104,29 @@ export default function ArchiveSection() {
               <CardDescription>Manage your archive products</CardDescription>
             </div>
           </div>
-          <form onSubmit={(e: React.FormEvent) => {
-            e.preventDefault()
-            setSearchTerm(searchInput)
-          }} method="post">
-            <div className="w-md flex flex-row gap-2">
-              <Input placeholder="Search archive product..." className="py-6 px-4" onChange={(e) => setSearchInput(e.target.value)} />
-              <Button
-                type='button'
-                className="py-6 px-6"
-              >
-                Search
-              </Button>
+          <div className="flex flex-col gap-2">
+            <form onSubmit={(e: React.FormEvent) => {
+              e.preventDefault()
+              setSearchTerm(searchInput)
+            }} method="post">
+              <div className="w-md flex flex-row gap-2">
+                <Input placeholder="Search archive product..." className="py-6 px-4" onChange={(e) => setSearchInput(e.target.value)} />
+                <Button
+                  type='button'
+                  className="py-6 px-6"
+                >
+                  Search
+                </Button>
+              </div>
+            </form>
+            <div className='mt-2 -mb-5'>
+              <FilteredByStatus
+                filterStatus={filterStatus}
+                setFilterStatus={setFilterStatus}
+                totalFiltered={totalFiltered}
+              />
             </div>
-          </form>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="relative min-h-150 overflow-hidden">
@@ -110,46 +135,62 @@ export default function ArchiveSection() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      {["ID", "Product ID", "Name", "Category", "Price", "Stock", "BarCode", "Deleted At", "Action"].map((item) => (
+                      {["ID", "Product ID", "Name", "Category", "Price", "Stock", "Status", "BarCode", "Deleted At", "Action"].map((item) => (
                         <TableHead key={item}>{item}</TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {archives.map((archive) => (
-                      <TableRow key={archive.id}>
-                        <TableCell>{archive.id}</TableCell>
-                        <TableCell>{archive.productId}</TableCell>
-                        <TableCell>{archive.productName}</TableCell>
-                        <TableCell>{archive.category}</TableCell>
-                        <TableCell>&#8369;{formatCurrency(archive.price)}</TableCell>
-                        <TableCell>{archive.stockQuantity}</TableCell>
-                        <TableCell>
-                          <img
-                            className="w-12 h-12 object-cover rounded"
-                            src={`data:image/png;base64,${archive.barCode}`}
-                            alt="barcode img"
-                          />
-                        </TableCell>
-                        <TableCell>{formatDateTime(archive.deletedAt)}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-row gap-1.5">
-                            <button title="Restore Item" onClick={() => {
-                              setSelectedId(archive.productId);
-                              setIsRestoreModalOpen(true)
-                            }}>
-                              <ArchiveRestoreIcon className="text-orange-500 hover:text-orange-700" />
-                            </button>
-                            <button title="Delete Item" onClick={() => {
-                              setSelectedId(archive.productId);
-                              setIsDeleteModalOpen(true)
-                            }}>
-                              <Trash2Icon className="text-red-500 hover:text-red-700" />
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {filteredProducts.map((archive) => {
+                      const status = getProductStatus(archive)
+                      return (
+                        <TableRow key={archive.id}>
+                          <TableCell>{archive.id}</TableCell>
+                          <TableCell>{archive.productId}</TableCell>
+                          <TableCell>{archive.productName}</TableCell>
+                          <TableCell>{archive.category}</TableCell>
+                          <TableCell>&#8369;{formatCurrency(archive.price)}</TableCell>
+                          <TableCell>{archive.stockQuantity}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                status === 'In Stock'
+                                  ? 'default'
+                                  : status === 'Low Stock'
+                                    ? 'secondary'
+                                    : 'destructive'
+                              }
+                            >
+                              {status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <img
+                              className="w-12 h-12 object-cover rounded"
+                              src={`data:image/png;base64,${archive.barCode}`}
+                              alt="barcode img"
+                            />
+                          </TableCell>
+                          <TableCell>{formatDateTime(archive.deletedAt)}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-row gap-1.5">
+                              <button title="Restore Item" onClick={() => {
+                                setSelectedId(archive.productId);
+                                setIsRestoreModalOpen(true)
+                              }}>
+                                <ArchiveRestoreIcon className="text-orange-500 hover:text-orange-700" />
+                              </button>
+                              <button title="Delete Item" onClick={() => {
+                                setSelectedId(archive.productId);
+                                setIsDeleteModalOpen(true)
+                              }}>
+                                <Trash2Icon className="text-red-500 hover:text-red-700" />
+                              </button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
                     {archives.length == 0 && (
                       <TableRow>
                         <TableCell colSpan={9}>

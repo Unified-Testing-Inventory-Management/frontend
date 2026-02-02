@@ -2,7 +2,7 @@ import type { TransactionData } from "@/@types";
 import { api } from "./axios_api";
 
 type transactionData = {
-  data: Omit<TransactionData, "id" | "image" | "stockQuantity" | "createdAt" | "barCode">
+  data: Omit<TransactionData, "id" | "image" | "stockQuantity" | "createdAt" | "barCode" | "updatedAt">
 }
 
 export const allProductSales = async () => {

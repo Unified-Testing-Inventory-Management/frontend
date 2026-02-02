@@ -68,7 +68,7 @@ export function ProductsSection() {
   const [message, setMessage] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [productFormData, setProductFormData] = useState<
-    Omit<Product, 'id' | 'createdAt' | 'barCode'>
+    Omit<Product, 'id' | 'createdAt' | 'barCode' | 'updatedAt'>
   >({
     image: null,
     productName: '',
@@ -77,7 +77,7 @@ export function ProductsSection() {
     stockQuantity: 0,
   })
   const [editProductData, setEditProductData] = useState<
-    Omit<Product, 'id' | 'createdAt' | 'barCode' | 'image'>
+    Omit<Product, 'id' | 'createdAt' | 'barCode' | 'image' | 'updatedAt'>
   >({
     productName: '',
     category: '',
@@ -315,7 +315,7 @@ export function ProductsSection() {
               <Table className="w-full">
                 <TableHeader className="sticky top-0 bg-white z-10">
                   <TableRow>
-                    {["Image", "Name", "Category", "Price", "Stock", "Status", "BarCode", "Created At", "Action"].map((item) => (
+                    {["Image", "Name", "Category", "Price", "Stock", "Status", "BarCode", "Created At", "Updated At", "Action"].map((item) => (
                       <TableHead key={item}>{item}</TableHead>
                     ))}
                   </TableRow>
@@ -370,6 +370,7 @@ export function ProductsSection() {
                           />
                         </TableCell>
                         <TableCell>{formatDateTime(product.createdAt)}</TableCell>
+                        <TableCell>{formatDateTime(product.updatedAt)}</TableCell>
                         <TableCell>
                           <div className="flex flex-row gap-1.5">
                             <EditIcon className="text-blue-500 hover:text-blue-700" onClick={() => { handleOpenEditModal(product) }} />

@@ -3,6 +3,7 @@ export type TRegisterUserData = {
   lastName: string
   username: string
   password: string
+  confirmPassword: string
   role: string
 }
 
@@ -28,6 +29,7 @@ export type Product = {
   price: number
   stockQuantity: number
   createdAt: string
+  updatedAt: string
   barCode: string
 }
 
@@ -40,7 +42,7 @@ export type ArchiveProductsData = Product & {
   deletedAt: string
 }
 
-export type TransactionData = Omit<Product, "barCode" | "createdAt" | "id" | "image" | "stockQuantity"> & {
+export type TransactionData = Omit<Product, "barCode" | "createdAt" | "updatedAt" | "id" | "image" | "stockQuantity"> & {
   productId: string,
   totalAmount: number,
   quantity: number,

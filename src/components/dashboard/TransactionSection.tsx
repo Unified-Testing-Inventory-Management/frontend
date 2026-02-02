@@ -291,7 +291,7 @@ function TransactionSection() {
                     <Label className="text-sm font-semibold text-muted-foreground">
                       Available Stock
                     </Label>
-                    <p className="text-base">{selectedProduct.stockQuantity}</p>
+                    <p className="text-base">{selectedProduct?.id && Number(selectedProduct.stockQuantity - quantity)}</p>
                   </div>
 
                   <div>

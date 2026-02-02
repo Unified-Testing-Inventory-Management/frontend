@@ -20,7 +20,7 @@ export const searchProductName = async (searchTerm: string) => {
 }
 
 export const registerProduct = async (
-  data: Omit<Product, 'id' | 'createdAt' | 'barCode'>,
+  data: Omit<Product, 'id' | 'createdAt' | 'barCode' | 'updatedAt'>,
 ) => {
 
   const form = new FormData()

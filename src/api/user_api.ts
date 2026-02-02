@@ -6,7 +6,7 @@ export const checkAuth = async (): Promise<User> => {
     return res.data
 }
 
-export const registerUser = async (data: TRegisterUserData) => {
+export const registerUser = async (data: Omit<TRegisterUserData, "confirmPassword">) => {
     const res = await api.post('/api/v1/users/auth/register', data)
     return res.data
 }

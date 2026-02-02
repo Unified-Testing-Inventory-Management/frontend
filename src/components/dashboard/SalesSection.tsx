@@ -47,7 +47,6 @@ export function SalesSection() {
                 <TableRow>
                   {[
                     "Sale ID",
-                    "User ID",
                     "Products",
                     "Category",
                     "Quantity",
@@ -67,8 +66,6 @@ export function SalesSection() {
                 {sales.map((sale) => (
                   <TableRow key={sale.id}>
                     <TableCell className="font-medium">{sale.id}</TableCell>
-                    <TableCell>{sale.userId}</TableCell>
-
                     <TableCell>
                       {sale.saleDetails.map((item, idx) => (
                         <div key={idx} className="text-sm">

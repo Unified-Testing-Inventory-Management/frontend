@@ -51,7 +51,7 @@ export type TransactionData = Omit<Product, "barCode" | "createdAt" | "updatedAt
 
 export type UpdateProductData = {
   id: string | number;
-  data: Omit<Product, "id" | "createdAt" | "barCode" | "image">
+  data: Omit<Product, "id" | "createdAt" | "barCode" | "image" | "updatedAt">
 }
 
 export type Sale = {

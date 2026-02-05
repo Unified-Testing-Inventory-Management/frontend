@@ -139,7 +139,7 @@ function RouteComponent() {
               <Package className="h-4 w-4" />
             </div>
             <div className="flex flex-col">
-              <span className="font-semibold">Inventory</span>
+              <span className="font-semibold">StockWise</span>
               <span className="text-xs text-muted-foreground">Management</span>
             </div>
           </div>

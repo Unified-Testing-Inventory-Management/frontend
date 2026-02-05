@@ -23,23 +23,18 @@ const FILTERS = [
     { label: 'Out of Stock', value: 'Out of Stock' },
 ] as const
 
-function FilteredByStatus({filterStatus, setFilterStatus, totalFiltered }: FilteredByStatusProps) {
+function FilteredByStatus({ filterStatus, setFilterStatus, totalFiltered }: FilteredByStatusProps) {
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button
                     variant="secondary"
-                    className="flex items-center gap-2 w-auto"
+                    className="flex items-center gap-2 rounded-md px-4"
                 >
-                    <Button
-                        variant="secondary"
-                        className="flex items-center gap-2 rounded-full px-4"
-                    >
-                        <span className="text-sm text-muted-foreground">Filtered by</span>
-                        <span className="font-medium">{filterStatus} ( <span className='text-red-500 font-bold'>{totalFiltered}</span> )</span>
-                        <ChevronDown className="h-4 w-4 opacity-60" />
-                    </Button>
+                    <span className="text-sm text-muted-foreground">Filtered by:</span>
+                    <span className="font-medium">{filterStatus} ( <span className='text-red-500 font-bold'>{totalFiltered}</span> )</span>
+                    <ChevronDown className="h-4 w-4 opacity-60" />
                 </Button>
             </DropdownMenuTrigger>
 

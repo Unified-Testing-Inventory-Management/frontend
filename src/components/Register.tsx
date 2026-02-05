@@ -77,9 +77,9 @@ export function Register({ open, onOpenChange }: RegisterProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-130">
         <DialogHeader>
-          <DialogTitle>Register for Inventory System</DialogTitle>
+          <DialogTitle>Register for StockWise</DialogTitle>
           <DialogDescription>
-            Create a new account to access the inventory system. Please fill in
+            Create a new account to access the StockWise. Please fill in
             all the required information.
           </DialogDescription>
         </DialogHeader>

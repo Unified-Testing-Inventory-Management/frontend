@@ -17,6 +17,7 @@ import {
   useCheckAuthQuery,
   useLoginUserMutation,
 } from '@/services/user_services'
+import logo from "../assets/logo1.webp"
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -75,10 +76,12 @@ function App() {
       <Card className="w-full max-w-md">
         <CardHeader className="">
           <CardTitle className="text-2xl font-bold text-center">
-            Inventory System
+            <div className='flex justify-center -mt-8'>
+              <img src={logo} alt="img logo" className='w-30'/>
+            </div>
           </CardTitle>
-          <CardDescription className="text-center">
-            Sign in to your account to continue
+          <CardDescription className="text-center -mt-10">
+            Sign in your account to continue
             <p className="mt-1.5 text-red-500 text-[17px]">{error && error}</p>
           </CardDescription>
         </CardHeader>

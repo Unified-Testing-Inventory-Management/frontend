@@ -1,49 +1,24 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import React, { useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
+import { PanelLeft } from 'lucide-react'
 import {
-  Package,
-  LayoutDashboard,
-  ShoppingCart,
-  TrendingUp,
-  Users,
-  User,
-  LogOut,
-  Activity,
-  ArchiveIcon
-} from 'lucide-react'
-import {
-  Sidebar,
-  SidebarContent,
   SidebarContext,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
   SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarProvider,
+  SidebarTrigger,
 } from '@/components/ui/sidebar'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { Button } from '@/components/ui/button'
+import React from 'react'
 import { OverviewSection } from '@/components/dashboard/OverviewSection'
 import { ProductsSection } from '@/components/dashboard/ProductsSection'
 import { SalesSection } from '@/components/dashboard/SalesSection'
 import { StocksSection } from '@/components/dashboard/StocksSection'
 import { SettingsSection } from '@/components/dashboard/SettingsSection'
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { useProductSales } from '@/data'
 import { useProducts } from '@/data'
 import { getStockAlertStatus } from '@/@types'
 import type { SaleWithDetails, StockAlert } from '@/@types'
 import { ProtectedRoute } from '@/middleware'
-import { useLogoutUserMutation, UserData } from '@/services/user_services'
-import { useQueryClient } from '@tanstack/react-query'
 import TransactionSection from '@/components/dashboard/TransactionSection'
 import ArchiveSection from '@/components/dashboard/ArchiveSection'
 
@@ -59,29 +34,21 @@ function RouteComponent() {
   const [activeSection, setActiveSection] = useState<
     'overview' | 'products' | 'sales' | 'stocks' | 'settings' | 'transactions' | 'archive'
   >('overview')
-  const { open: sidebarOpen } = React.useContext(SidebarContext)
-  const user = UserData()
-  const navigate = useNavigate()
-  const logout = useLogoutUserMutation()
-  const queryClient = useQueryClient()
+  
+  return (
+    <SidebarProvider className='flex flex-row relative' data-collapsible="icon">
+      <DashboardContent activeSection={activeSection} setActiveSection={setActiveSection} />
+    </SidebarProvider>
+  )
+}
+
+function DashboardContent({ activeSection, setActiveSection }: { 
+  activeSection: 'overview' | 'products' | 'sales' | 'stocks' | 'settings' | 'transactions' | 'archive'
+  setActiveSection: (section: 'overview' | 'products' | 'sales' | 'stocks' | 'settings' | 'transactions' | 'archive') => void
+}) {
+  const { open } = React.useContext(SidebarContext)
   const { products } = useProducts()
-  const { sales } = useProductSales();
-
-  const handleLogout = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    logout.mutateAsync(undefined, {
-      onSuccess: () => {
-        queryClient.clear()
-        navigate({ to: '/' })
-      },
-      onError: (err: any) => {
-        if (err.response) {
-          console.log(err.response?.data.error)
-        }
-      },
-    })
-  }
+  const { sales } = useProductSales()
 
   const salesWithDetails: SaleWithDetails[] = sales.map((sale) => {
     const details = sales.filter((sd) => sd.id === sale.id)
@@ -119,123 +86,18 @@ function RouteComponent() {
   ).length
   const totalSales = sales.length
 
-  const menuItems = [
-    { icon: LayoutDashboard, label: 'Overview', value: 'overview' },
-    { icon: Package, label: 'Products', value: 'products' },
-    { icon: ShoppingCart, label: 'Sales', value: 'sales' },
-    { icon: TrendingUp, label: 'Stocks', value: 'stocks' },
-    { icon: Activity, label: 'Transactions', value: 'transactions' },
-  ]
-
-  const othersItem = [
-    { icon: ArchiveIcon, label: "Archive", value: "archive" }
-  ]
   return (
-    <SidebarProvider>
-      <Sidebar className="border-r w-52">
-        <SidebarHeader>
-          <div className="flex items-center gap-2 px-2 py-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Package className="h-4 w-4" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-semibold">StockWise</span>
-              <span className="text-xs text-muted-foreground">Management</span>
-            </div>
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {menuItems.map((item) => (
-                  <SidebarMenuItem key={item.value}>
-                    <SidebarMenuButton
-                      onClick={() => setActiveSection(item.value as any)}
-                      isActive={activeSection === item.value}
-                    >
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-          <SidebarGroup>
-            <SidebarGroupLabel>Others</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {othersItem.map((item) => (
-                  <SidebarMenuItem key={item.value}>
-                    <SidebarMenuButton
-                      onClick={() => setActiveSection(item.value as any)}
-                      isActive={activeSection === item.value}
-                    >
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <SidebarMenuButton size="lg">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                      <Users className="size-4" />
-                    </div>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">
-                        {user
-                          ? `${user.firstName} ${user.lastName}`
-                          : 'Admin User'}
-                      </span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        {user ? user.username : 'admin@example.com'}
-                      </span>
-                    </div>
-                  </SidebarMenuButton>
-                </PopoverTrigger>
-                <PopoverContent className="w-56 p-2" align="end" side="top">
-                  <div className="flex flex-col gap-1">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setActiveSection('settings')
-                      }}
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      My Account
-                    </Button>
-                    <form onSubmit={handleLogout}>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start text-destructive hover:text-destructive"
-                      >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Logout
-                      </Button>
-                    </form>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset
-        className={`transition-[margin] duration-300 ease-linear ${sidebarOpen ? 'lg:ml-[var(--sidebar-width)]' : 'lg:ml-[var(--sidebar-width)]'}`}
-      >
+    <>
+      <DashboardSidebar 
+        activeSection={activeSection} 
+        onSectionChange={setActiveSection} 
+      />
+      <SidebarInset className={`flex-1 transition-[margin] duration-300 ease-linear ${open ? 'lg:ml-[var(--sidebar-width)]' : 'lg:ml-[var(--sidebar-width-icon)]'}`}>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <div className="flex flex-1 items-center gap-2">
+            <SidebarTrigger>
+              <PanelLeft className="h-4 w-4" />
+            </SidebarTrigger>
             <h1 className="text-lg font-semibold">
               {activeSection === 'overview' && 'Dashboard Overview'}
               {activeSection === 'products' && 'Products Management'}
@@ -285,6 +147,6 @@ function RouteComponent() {
           {activeSection === 'archive' && (<ArchiveSection />)}
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </>
   )
 }

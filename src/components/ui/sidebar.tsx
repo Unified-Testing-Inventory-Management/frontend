@@ -14,9 +14,12 @@ const Sidebar = React.forwardRef<
       data-sidebar="sidebar"
       data-state={open ? "expanded" : "collapsed"}
       className={cn(
-        "peer fixed inset-y-0 z-50 hidden h-screen w-[--sidebar-width] flex-col border-r bg-sidebar transition-all duration-300 ease-linear data-[state=collapsed]:w-[--sidebar-width-icon] lg:flex",
+        "peer fixed inset-y-0 z-50 hidden h-screen flex-col border-r bg-sidebar transition-all duration-300 ease-linear lg:flex",
         className
       )}
+      style={{
+        width: open ? 'var(--sidebar-width)' : 'var(--sidebar-width-icon)',
+      }}
       {...props}
     />
   )

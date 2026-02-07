@@ -9,7 +9,8 @@ import {
   getAllArchiveProducts,
   restoreProduct,
   deleteProduct,
-  searchArchiveProductName
+  searchArchiveProductName,
+  importProductFromExcel
 } from '@/api/product_api'
 
 export const useRegisterProductMutation = () => {
@@ -112,5 +113,17 @@ export const useAllArchivesProducts = () => {
     queryFn: getAllArchiveProducts,
     queryKey: ['archive'],
     staleTime: 1000 * 60,
+  })
+}
+
+export const useImportProductFromExcel = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: importProductFromExcel,
+    mutationKey: ["import-excel"],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
   })
 }

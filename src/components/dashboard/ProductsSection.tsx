@@ -2,11 +2,13 @@ import {
   ArchiveIcon,
   CheckCircle2Icon,
   EditIcon,
+  Import,
+  ImportIcon,
   PackageIcon,
   Plus,
   Search,
 } from 'lucide-react'
-import React, { Activity, useMemo, useState, type FormEvent } from 'react'
+import React, { Activity, useMemo, useRef, useState, type FormEvent } from 'react'
 import type { Product } from '@/@types'
 import {
   Card,
@@ -46,6 +48,7 @@ import { formatDateTime } from '@/utils/formatDateTime'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { useProducts } from '@/data'
 import FilteredByStatus from '../FilteredByStatus'
+import ExcelImportButton from '../ExcelImportButton'
 
 type FilterStatus = 'All' | 'In Stock' | 'Low Stock' | 'Out of Stock'
 
@@ -298,11 +301,14 @@ export function ProductsSection() {
                 </form>
               </div>
               <div className='mt-2 -mb-5'>
-                <FilteredByStatus
-                  filterStatus={filterStatus}
-                  setFilterStatus={setFilterStatus}
-                  totalFiltered={totalFiltered}
-                />
+                <div className='flex flex-row justify-between'>
+                  <FilteredByStatus
+                    filterStatus={filterStatus}
+                    setFilterStatus={setFilterStatus}
+                    totalFiltered={totalFiltered}
+                  />
+                  <ExcelImportButton />
+                </div>
               </div>
             </div>
           </div>

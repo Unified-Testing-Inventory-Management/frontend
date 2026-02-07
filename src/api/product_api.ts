@@ -75,3 +75,13 @@ export const getAllArchiveProducts = async () => {
   const res = await api.get("/api/v1/products/archive");
   return res.data
 }
+
+export const importProductFromExcel = async (file: File) => {
+  const data = new FormData()
+  data.append("file", file)
+
+  const res = await api.post("/api/v1/products/import-excel", data);
+  console.log(res)
+  
+  return res.data
+}

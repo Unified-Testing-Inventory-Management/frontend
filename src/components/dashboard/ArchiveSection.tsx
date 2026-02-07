@@ -193,7 +193,7 @@ export default function ArchiveSection() {
                     })}
                     {archives.length == 0 && (
                       <TableRow>
-                        <TableCell colSpan={9}>
+                        <TableCell colSpan={10}>
                           <div className="flex flex-col h-120 items-center justify-center py-10 text-muted-foreground">
                             <PackageIcon className="mb-3 h-10 w-10 text-gray-400" />
                             <p className="text-base font-medium">

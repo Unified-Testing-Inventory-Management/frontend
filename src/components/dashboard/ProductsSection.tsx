@@ -2,13 +2,11 @@ import {
   ArchiveIcon,
   CheckCircle2Icon,
   EditIcon,
-  Import,
-  ImportIcon,
   PackageIcon,
   Plus,
   Search,
 } from 'lucide-react'
-import React, { Activity, useMemo, useRef, useState, type FormEvent } from 'react'
+import React, { Activity, useMemo, useState, type FormEvent } from 'react'
 import type { Product } from '@/@types'
 import {
   Card,

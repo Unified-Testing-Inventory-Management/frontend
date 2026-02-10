@@ -1,4 +1,4 @@
-import type { TLoginUserData, TRegisterUserData, User } from '@/@types'
+import type { TLoginUserData, TRegisterUserData, TUpdateUserData, User } from '@/@types'
 import { api } from './axios_api'
 
 export const checkAuth = async (): Promise<User> => {
@@ -13,6 +13,11 @@ export const registerUser = async (data: Omit<TRegisterUserData, "confirmPasswor
 
 export const loginUser = async (data: TLoginUserData) => {
     const res = await api.post('/api/v1/users/auth/login', data)
+    return res.data
+}
+
+export const updateUser = async (data: TUpdateUserData) => {
+    const res = await api.patch("/api/v1/users/auth/update-profile", data)
     return res.data
 }
 

@@ -1,24 +1,19 @@
-export type TRegisterUserData = {
-  firstName: string
-  lastName: string
-  username: string
-  password: string
-  confirmPassword: string
-  role: string
-}
-
-export type TLoginUserData = {
-  username: string
-  password: string
-}
-
 export type User = {
   id: string
   username: string
   firstName: string
   lastName: string
+  password: string
   role: string
 }
+
+export type TRegisterUserData = Omit<User, "id" | "role"> & {
+  confirmPassword: string
+}
+
+export type TLoginUserData = Pick<User, "username" | "password">
+
+export type TUpdateUserData = Pick<User, "firstName" | "lastName" | "username">
 
 // Type definitions for dashboard
 export type Product = {

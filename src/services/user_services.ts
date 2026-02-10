@@ -1,5 +1,5 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { checkAuth, loginUser, registerUser, logoutUser } from '@/api/user_api'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { checkAuth, loginUser, registerUser, logoutUser, updateUser } from '@/api/user_api'
 import type { User } from '@/@types'
 
 export const UserData = (): User | null => {
@@ -23,10 +23,21 @@ export const useLoginUserMutation = () => {
 
 export const useCheckAuthQuery = () => {
     return useQuery({
-        queryKey: ['me'],
         queryFn: checkAuth,
+        queryKey: ['me'],
         retry: false,
         staleTime: 1000 * 60,
+    })
+}
+
+export const useUpdateUserMutation = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: updateUser,
+        mutationKey: ["update-profile"],
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["me"] })
+        }
     })
 }
 

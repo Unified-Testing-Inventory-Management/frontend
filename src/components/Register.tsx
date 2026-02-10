@@ -19,6 +19,7 @@ interface RegisterProps {
 }
 
 export function Register({ open, onOpenChange }: RegisterProps) {
+  const register = useRegisterUserMutation();
   const [isShowPassword, setIsShowPassword] = useState(false)
   const [isShowConfirmPassword, setShowConfirmPassword] = useState(false)
   const [message, setMessage] = useState("");
@@ -30,7 +31,19 @@ export function Register({ open, onOpenChange }: RegisterProps) {
     confirmPassword: "",
   })
 
-  const register = useRegisterUserMutation();
+  const passwordMismatch =
+    formData.password &&
+    formData.confirmPassword &&
+    formData.password !== formData.confirmPassword
+
+
+  const isFormValid =
+    formData.firstName &&
+    formData.lastName &&
+    formData.username &&
+    formData.password &&
+    formData.confirmPassword &&
+    !passwordMismatch
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,7 +55,7 @@ export function Register({ open, onOpenChange }: RegisterProps) {
       isError = true
     }
 
-    if (isError) return true
+    if (isError) return
 
     register.mutate(formData, {
       onSuccess: () => {
@@ -161,6 +174,7 @@ export function Register({ open, onOpenChange }: RegisterProps) {
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button
+              disabled={!isFormValid}
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}

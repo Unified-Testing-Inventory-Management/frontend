@@ -48,7 +48,6 @@ export function Register({ open, onOpenChange }: RegisterProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     let isError = false
-    console.log('Register:', formData)
 
     if (formData.confirmPassword !== formData.password) {
       setMessage("Password does not match")
@@ -74,7 +73,6 @@ export function Register({ open, onOpenChange }: RegisterProps) {
         }
       }
     })
-
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

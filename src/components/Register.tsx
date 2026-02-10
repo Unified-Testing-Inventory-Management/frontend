@@ -28,8 +28,8 @@ export function Register({ open, onOpenChange }: RegisterProps) {
     username: "",
     password: "",
     confirmPassword: "",
-    role: "Admin"
   })
+
   const register = useRegisterUserMutation();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -53,7 +53,6 @@ export function Register({ open, onOpenChange }: RegisterProps) {
           username: "",
           password: "",
           confirmPassword: "",
-          role: ""
         });
       },
       onError: (err: any) => {

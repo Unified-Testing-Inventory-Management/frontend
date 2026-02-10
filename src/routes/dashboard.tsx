@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { PanelLeft } from 'lucide-react'
+import { Bell, PanelLeft } from 'lucide-react'
 import {
   SidebarContext,
   SidebarInset,
@@ -34,7 +34,7 @@ function RouteComponent() {
   const [activeSection, setActiveSection] = useState<
     'overview' | 'products' | 'sales' | 'stocks' | 'settings' | 'transactions' | 'archive'
   >('overview')
-  
+
   return (
     <SidebarProvider className='flex flex-row relative' data-collapsible="icon">
       <DashboardContent activeSection={activeSection} setActiveSection={setActiveSection} />
@@ -42,7 +42,7 @@ function RouteComponent() {
   )
 }
 
-function DashboardContent({ activeSection, setActiveSection }: { 
+function DashboardContent({ activeSection, setActiveSection }: {
   activeSection: 'overview' | 'products' | 'sales' | 'stocks' | 'settings' | 'transactions' | 'archive'
   setActiveSection: (section: 'overview' | 'products' | 'sales' | 'stocks' | 'settings' | 'transactions' | 'archive') => void
 }) {
@@ -88,9 +88,9 @@ function DashboardContent({ activeSection, setActiveSection }: {
 
   return (
     <>
-      <DashboardSidebar 
-        activeSection={activeSection} 
-        onSectionChange={setActiveSection} 
+      <DashboardSidebar
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
       />
       <SidebarInset className={`flex-1 transition-[margin] duration-300 ease-linear ${open ? 'lg:ml-[var(--sidebar-width)]' : 'lg:ml-[var(--sidebar-width-icon)]'}`}>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -108,6 +108,7 @@ function DashboardContent({ activeSection, setActiveSection }: {
               {activeSection === 'archive' && 'Archive Management'}
             </h1>
           </div>
+          <Bell size={20} />
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 overflow-auto">
           {activeSection === 'overview' && (

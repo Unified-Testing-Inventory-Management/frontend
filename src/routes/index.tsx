@@ -48,15 +48,13 @@ function App() {
     setIsSubmitting(true)
 
     await login.mutateAsync(formData, {
-      onSuccess: (data) => {
-        console.log(data)
+      onSuccess: () => {
         setIsSubmitting(false)
         navigate({ to: '/dashboard' })
       },
       onError: (err: any) => {
         if (err.response) {
           setIsSubmitting(false)
-          console.log(err.response?.data.error)
           setError(err.response?.data.error)
         }
       },

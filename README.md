@@ -71,7 +71,7 @@ The application leverages powerful frontend technologies to ensure performance, 
 ```bash
     npm install
 ```
-- Build your application
+- Build the application
 ```bash
     npm run build
 ```

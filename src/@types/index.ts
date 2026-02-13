@@ -17,6 +17,7 @@ export type TUpdateUserData = Pick<User, "firstName" | "lastName" | "username">
 
 // Type definitions for dashboard
 export type Product = {
+  [x: string]: any
   id: string | number
   image: File | null | string
   productName: string
@@ -26,6 +27,7 @@ export type Product = {
   createdAt: string
   updatedAt: string
   barCode: string
+  userId?: string
 }
 
 export type ArchiveProductsData = Product & {
@@ -89,4 +91,11 @@ export const getProductStatus = (
 
 export const getStockAlertStatus = (product: Product): 'Low' | 'Out' => {
   return Number(product.stockQuantity) === 0 ? 'Out' : 'Low'
+}
+
+export type TProductInSights = Pick<Product, "productName" | "stockQuantity"> & {
+  productId: string;
+  userId: string;
+  status: string
+  message: string
 }

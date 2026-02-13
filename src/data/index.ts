@@ -1,5 +1,5 @@
-import type { ArchiveProductsData, Product, SaleDetail, SaleWithDetails } from '../@types/index';
-import { useAllArchivesProducts, useAllProductsQuery, useSearchArchiveProduct, useSearchProducts } from '@/services/product_services'
+import type { ArchiveProductsData, Product, SaleDetail, SaleWithDetails, TProductInSights } from '../@types/index';
+import { useAllArchivesProducts, useAllProductsQuery, useProductInSights, useSearchArchiveProduct, useSearchProducts } from '@/services/product_services'
 import { useAllProductSalesQuery, useSearchSaleProducts } from '@/services/sale_services'
 
 export const useProducts = (searchTerm?: string) => {
@@ -32,3 +32,14 @@ export const useAllArchiveProducts = (searchTerm?: string) => {
     error: query.error
   }
 }
+
+export const useProductSights = () => {
+  const data = useProductInSights()
+
+  return {
+    insights: data.data?.data as TProductInSights[] || [],
+    isLoading: data.isLoading,
+    error: data.error
+  }
+}
+

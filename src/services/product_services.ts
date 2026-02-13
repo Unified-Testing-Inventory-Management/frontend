@@ -10,7 +10,8 @@ import {
   restoreProduct,
   deleteProduct,
   searchArchiveProductName,
-  importProductFromExcel
+  importProductFromExcel,
+  productInSights
 } from '@/api/product_api'
 
 export const useRegisterProductMutation = () => {
@@ -125,5 +126,12 @@ export const useImportProductFromExcel = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
     },
+  })
+}
+
+export const useProductInSights = () => {
+  return useQuery({
+    queryFn: productInSights,
+    queryKey: ["product-insights"]
   })
 }

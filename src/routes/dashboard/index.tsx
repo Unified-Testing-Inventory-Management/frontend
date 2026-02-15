@@ -113,14 +113,14 @@ function DashboardContent({ activeSection, setActiveSection }: {
           </div>
           <Popover>
             <PopoverTrigger asChild>
-              <div className='relative' onClick={() => setIsNotificationOpen(prev => !prev)} >
+              <div className='relative' onClick={() => setIsNotificationOpen((prev) => !prev)} >
                 <div className='absolute -top-3 left-2 bg-red-500 w-4.5 h-4.5 rounded-full flex justify-center items-center'>
                   <span className='text-white text-[10px] font-bold'>{Number(insights.length)}</span>
                 </div>
                 <Bell size={20} />
               </div>
             </PopoverTrigger>
-            <PopoverContent className='mr-6 w-96 p-0'>
+            <PopoverContent className='mr-6 w-96 p-0 z-50'>
               <Activity mode={isNotificationOpen ? "visible" : "hidden"}>
                 <div className='p-4'>
                   <header className='mb-4 pb-4 border-b'>

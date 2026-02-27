@@ -21,7 +21,8 @@ export const useRegisterProductMutation = () => {
     mutationFn: registerProduct,
     mutationKey: ['products'],
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['products'] }),
+      queryClient.invalidateQueries({ queryKey: ["product-insights"] })
     },
   })
 }
@@ -30,7 +31,7 @@ export const useAllProductsQuery = () => {
   return useQuery({
     queryKey: ['products'],
     queryFn: getAllProducts,
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 60 * 5,
   })
 }
 
@@ -38,6 +39,7 @@ export const useGetProductById = (id: string) => {
   return useQuery({
     queryKey: ['products', id],
     queryFn: () => getProductById(id),
+    enabled: !!id
   })
 }
 
@@ -113,7 +115,7 @@ export const useAllArchivesProducts = () => {
   return useQuery({
     queryFn: getAllArchiveProducts,
     queryKey: ['archive'],
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 60 * 5,
   })
 }
 

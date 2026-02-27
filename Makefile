@@ -7,10 +7,10 @@ list:
 	@echo "build    - Build the project for production"
 
 install:
-	npm install
+	pnpm install
 
 run:
-	npm run dev
+	pnpm run dev
 
 build:
-	npm run build
+	pnpm run build

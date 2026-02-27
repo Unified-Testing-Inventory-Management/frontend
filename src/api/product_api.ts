@@ -88,6 +88,5 @@ export const importProductFromExcel = async (file: File) => {
 
 export const productInSights = async () => {
   const res = await api.get("/products/product-insights");
-  console.log(res.data)
   return res.data
 }

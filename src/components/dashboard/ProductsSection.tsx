@@ -6,7 +6,7 @@ import {
   Plus,
   Search,
 } from 'lucide-react'
-import React, { Activity, useMemo, useState, type FormEvent } from 'react'
+import React, { Activity, useEffect, useMemo, type FormEvent } from 'react'
 import type { Product } from '@/@types'
 import {
   Card,
@@ -47,45 +47,74 @@ import { formatCurrency } from '@/utils/formatCurrency'
 import { useProducts } from '@/data'
 import FilteredByStatus from '../FilteredByStatus'
 import ExcelImportButton from '../ExcelImportButton'
-
-type FilterStatus = 'All' | 'In Stock' | 'Low Stock' | 'Out of Stock'
+import {
+  useError,
+  useFilterProductStore,
+  useMessage,
+  useModalProductStore,
+  useProductStore,
+  useSetError,
+  useSetMessage,
+  useSetSubmitting,
+  useSetSuccess,
+  useSubmitting,
+  useSuccess,
+} from '@/states/product-state'
 
 export function ProductsSection() {
-  const [searchInput, setSearchInput] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const {
+    productData,
+    setProductData,
+    resetProductData,
+    searchInput,
+    setSearchInput,
+    searchTerm,
+    setSearchTerm,
+    imagePreview,
+    setImagePreview,
+    productId,
+    setProductId,
+    editProductData,
+    setEditProductData,
+  } = useProductStore()
+
+  const { filterStatus, setFilterStatus } = useFilterProductStore()
+
+  const {
+    editProductModalOpen,
+    setEditProductModalOpen,
+    archiveProductModalOpen,
+    setArchiveProductModalOpen,
+    addProductDialogOpen,
+    setAddProductDialogOpen
+  } = useModalProductStore()
+
   const { products } = useProducts(searchTerm)
   const register = useRegisterProductMutation()
   const updateProduct = useUpdateProductMutation()
   const archive = useArchiveProductById()
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>('All')
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [isEditProductModalOpen, setIsEditProductModalOpen] = useState<boolean>(false)
-  const [isArchiveModalOpen, setIsArchiveModalOpen] = useState<boolean>(false)
-  const [productId, setProductId] = useState<string | number | null>(null)
-  const [isAddProductDialogOpen, setIsAddProductDialogOpen] =
-    useState<boolean>(false)
-  const [isError, setIsError] = useState<boolean>(false)
-  const [isSuccess, setIsSuccess] = useState<boolean>(false)
-  const [message, setMessage] = useState<string>('')
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-  const [productFormData, setProductFormData] = useState<
-    Omit<Product, 'id' | 'createdAt' | 'barCode' | 'updatedAt'>
-  >({
-    image: null,
-    productName: '',
-    category: '',
-    price: 0,
-    stockQuantity: 0,
-  })
-  const [editProductData, setEditProductData] = useState<
-    Omit<Product, 'id' | 'createdAt' | 'barCode' | 'image' | 'updatedAt'>
-  >({
-    productName: '',
-    category: '',
-    price: 0,
-    stockQuantity: 0,
-  })
-  const getProductDetails = products.find((product) => product.id == productId);
+
+  const isError = useError()
+  const setIsError = useSetError()
+  const isSuccess = useSuccess()
+  const setIsSuccess = useSetSuccess()
+  const message = useMessage()
+  const setMessage = useSetMessage()
+  const isSubmitting = useSubmitting()
+  const setIsSubmitting = useSetSubmitting()
+
+  const getProductDetails = products.find((product) => product.id == productId)
+
+  useEffect(() => {
+    if (editProductModalOpen && getProductDetails) {
+      setEditProductData({
+        productName: getProductDetails.productName,
+        category: getProductDetails.category,
+        price: getProductDetails.price,
+        stockQuantity: getProductDetails.stockQuantity,
+      })
+    }
+  }, [editProductModalOpen, getProductDetails])
 
   // Handle Add Product Change
   const handleProductFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,51 +122,46 @@ export function ProductsSection() {
 
     if (name === 'image' && files) {
       const file = files[0]
-      setProductFormData((prev) => ({
-        ...prev,
-        image: file || null,
-      }))
+
+      setProductData(({ image: file || null }))
+
       const previewUrl = URL.createObjectURL(file)
       setImagePreview(previewUrl)
-
       return
     }
 
-    setProductFormData((prev) => ({
-      ...prev,
+    setProductData({
       [name]:
         name === 'productName' ||
           name === 'category' ||
           name === 'stockQuantity'
           ? value
           : parseFloat(value) || 0,
-    }))
+    })
   }
 
   const handleOpenEditModal = (product: Product) => {
     setProductId(product.id)
+  
     setEditProductData({
       productName: product.productName,
       category: product.category,
       price: product.price,
       stockQuantity: product.stockQuantity,
     })
-    setIsEditProductModalOpen(true)
+    setEditProductModalOpen(true)
   }
 
   // Handle Edit Product Change
   const handleUpdateProductDataChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = e.target
 
-    setEditProductData((prev) => ({
-      ...prev,
+    setEditProductData({
       [name]:
-        name === 'productName' || name === 'category'
-          ? value
-          : Number(value),
-    }))
+        name === 'productName' || name === 'category' ? value : Number(value),
+    })
   }
 
   // Submit Product Created
@@ -148,20 +172,14 @@ export function ProductsSection() {
     setIsSuccess(false)
     setMessage('')
 
-    await register.mutateAsync(productFormData, {
+    await register.mutateAsync(productData, {
       onSuccess: (data) => {
         setIsSuccess(true)
         setMessage(data.message)
-        setIsAddProductDialogOpen(false)
+        setAddProductDialogOpen(false)
 
         setTimeout(() => {
-          setProductFormData({
-            image: null,
-            productName: '',
-            category: '',
-            price: 0,
-            stockQuantity: 0,
-          })
+          resetProductData()
           setIsSuccess(false)
           setMessage('')
           setIsSubmitting(false)
@@ -170,7 +188,7 @@ export function ProductsSection() {
       onError: (err: any) => {
         setIsError(true)
         setIsSubmitting(false)
-        setIsAddProductDialogOpen(true)
+        setAddProductDialogOpen(true)
         if (err.response) {
           setMessage(err.response?.data.error)
           console.error('Error registering product:', err.response?.data.error)
@@ -191,7 +209,7 @@ export function ProductsSection() {
         onSuccess: (data) => {
           setIsSuccess(true)
           setMessage(data.message)
-          setIsEditProductModalOpen(false)
+          setEditProductModalOpen(false)
 
           setTimeout(() => {
             setEditProductData({
@@ -209,7 +227,7 @@ export function ProductsSection() {
           setIsError(true)
           setMessage(err.response?.data?.error || 'Update failed')
         },
-      }
+      },
     )
   }
 
@@ -221,7 +239,7 @@ export function ProductsSection() {
         setIsSuccess(true)
         setMessage(data.message)
         setIsError(true)
-        setIsArchiveModalOpen(false)
+        setArchiveProductModalOpen(false)
 
         setTimeout(() => {
           setIsSuccess(false)
@@ -246,7 +264,7 @@ export function ProductsSection() {
     <>
       <Activity mode={isSuccess ? 'visible' : 'hidden'}>
         <Alert className="animate-fade-in-out bg-green-500 w-70 absolute right-2 top-4">
-          <CheckCircle2Icon color='white' />
+          <CheckCircle2Icon color="white" />
           <AlertTitle>
             <span className="text-white text-[16px] font-bold">{message}</span>
           </AlertTitle>
@@ -256,50 +274,53 @@ export function ProductsSection() {
       {/* Product Card Table */}
       <Card className="h-200">
         <CardHeader>
-          <div className='flex flex-col gap-4'>
+          <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>Products</CardTitle>
                 <CardDescription>Manage your product inventory</CardDescription>
               </div>
-              <Button className='hidden md:flex' onClick={() => setIsAddProductDialogOpen(true)}>
+              <Button
+                className="hidden md:flex"
+                onClick={() => setAddProductDialogOpen(true)}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Product
               </Button>
-              <Button className='md:hidden' onClick={() => setIsAddProductDialogOpen(true)}>
+              <Button
+                className="md:hidden"
+                onClick={() => setAddProductDialogOpen(true)}
+              >
                 <Plus className="mr-2 h-4 w-4" />
               </Button>
             </div>
-            <div className='flex flex-col gap-2'>
+            <div className="flex flex-col gap-2">
               <div>
-                <form onSubmit={(e: FormEvent) => {
-                  e.preventDefault()
-                  setSearchTerm(searchInput)
-                }} method="post">
-                  <div className='w-md flex flex-row gap-2'>
+                <form
+                  onSubmit={(e: FormEvent) => {
+                    e.preventDefault()
+                    setSearchTerm(searchInput)
+                  }}
+                  method="post"
+                >
+                  <div className="w-md flex flex-row gap-2">
                     <Input
                       className="py-6 px-4"
                       placeholder="Search your product..."
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                     />
-                    <Button
-                      type='button'
-                      className="py-6 px-6 hidden md:flex"
-                    >
+                    <Button type="button" className="py-6 px-6 hidden md:flex">
                       Search
                     </Button>
-                    <Button
-                      type='button'
-                      className="py-6 px-6 md:hidden"
-                    >
+                    <Button type="button" className="py-6 px-6 md:hidden">
                       <Search />
                     </Button>
                   </div>
                 </form>
               </div>
-              <div className='mt-2 -mb-5'>
-                <div className='flex flex-row justify-between'>
+              <div className="mt-2 -mb-5">
+                <div className="flex flex-row justify-between">
                   <FilteredByStatus
                     filterStatus={filterStatus}
                     setFilterStatus={setFilterStatus}
@@ -310,8 +331,7 @@ export function ProductsSection() {
               </div>
             </div>
           </div>
-          <div>
-          </div>
+          <div></div>
         </CardHeader>
         <CardContent>
           <div className="relative min-h-150 overflow-hidden">
@@ -319,7 +339,18 @@ export function ProductsSection() {
               <Table className="w-full">
                 <TableHeader className="sticky top-0 bg-white z-10">
                   <TableRow>
-                    {["Image", "Name", "Category", "Price", "Stock", "Status", "BarCode", "Created At", "Updated At", "Action"].map((item) => (
+                    {[
+                      'Image',
+                      'Name',
+                      'Category',
+                      'Price',
+                      'Stock',
+                      'Status',
+                      'BarCode',
+                      'Created At',
+                      'Updated At',
+                      'Action',
+                    ].map((item) => (
                       <TableHead key={item}>{item}</TableHead>
                     ))}
                   </TableRow>
@@ -373,14 +404,23 @@ export function ProductsSection() {
                             alt="barcode img"
                           />
                         </TableCell>
-                        <TableCell>{formatDateTime(product.createdAt)}</TableCell>
-                        <TableCell>{formatDateTime(product.updatedAt)}</TableCell>
+                        <TableCell>
+                          {formatDateTime(product.createdAt)}
+                        </TableCell>
+                        <TableCell>
+                          {formatDateTime(product.updatedAt)}
+                        </TableCell>
                         <TableCell>
                           <div className="flex flex-row gap-1.5">
-                            <EditIcon className="text-blue-500 hover:text-blue-700" onClick={() => { handleOpenEditModal(product) }} />
+                            <EditIcon
+                              className="text-blue-500 hover:text-blue-700"
+                              onClick={() => {
+                                handleOpenEditModal(product)
+                              }}
+                            />
                             <ArchiveIcon
                               onClick={() => {
-                                setIsArchiveModalOpen(true)
+                                setArchiveProductModalOpen(true)
                                 setProductId(product.id)
                               }}
                               className="text-orange-500 hover:text-orange-700"
@@ -415,8 +455,8 @@ export function ProductsSection() {
 
       {/* Add Product Modal */}
       <Dialog
-        open={isAddProductDialogOpen}
-        onOpenChange={setIsAddProductDialogOpen}
+        open={addProductDialogOpen}
+        onOpenChange={setAddProductDialogOpen}
       >
         <DialogContent>
           <DialogHeader>
@@ -426,14 +466,18 @@ export function ProductsSection() {
               inventory.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleProductSubmit} className="space-y-4" encType="multipart/form-data">
+          <form
+            onSubmit={handleProductSubmit}
+            className="space-y-4"
+            encType="multipart/form-data"
+          >
             <div className="space-y-2">
               <Label htmlFor="productName">Product Name</Label>
               <Input
-                type='input'
+                type="input"
                 id="productName"
                 name="productName"
-                value={productFormData.productName}
+                value={productData.productName}
                 onChange={handleProductFormChange}
                 placeholder="Enter product name"
                 required
@@ -446,10 +490,10 @@ export function ProductsSection() {
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <Input
-                type='input'
+                type="input"
                 id="category"
                 name="category"
-                value={productFormData.category}
+                value={productData.category}
                 onChange={handleProductFormChange}
                 placeholder="Enter category"
                 required
@@ -458,11 +502,11 @@ export function ProductsSection() {
             <div className="space-y-2">
               <Label htmlFor="price">Price</Label>
               <Input
-                type='input'
+                type="input"
                 id="price"
                 name="price"
                 min="1"
-                value={productFormData.price}
+                value={productData.price}
                 onChange={handleProductFormChange}
                 placeholder="0.00"
                 required
@@ -474,23 +518,25 @@ export function ProductsSection() {
                 id="stockQuantity"
                 name="stockQuantity"
                 type="input"
-                value={productFormData.stockQuantity}
+                value={productData.stockQuantity}
                 onChange={handleProductFormChange}
                 placeholder="0"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="image">Image <small className='text-red-500'>(Optional)*</small></Label>
+              <Label htmlFor="image">
+                Image <small className="text-red-500">(Optional)*</small>
+              </Label>
               <Input
                 id="image"
                 name="image"
                 type="file"
-                accept='image/*'
+                accept="image/*"
                 onChange={handleProductFormChange}
               />
-              <Activity mode={imagePreview ? "visible" : "hidden"}>
-                <div className='flex justify-center items-center'>
+              <Activity mode={imagePreview ? 'visible' : 'hidden'}>
+                <div className="flex justify-center items-center">
                   <img
                     src={imagePreview!!}
                     alt="Product preview"
@@ -503,7 +549,7 @@ export function ProductsSection() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsAddProductDialogOpen(false)}
+                onClick={() => setAddProductDialogOpen(false)}
               >
                 Cancel
               </Button>
@@ -522,19 +568,26 @@ export function ProductsSection() {
       </Dialog>
 
       {/* Edit Product Modal */}
-      <Dialog open={isEditProductModalOpen} onOpenChange={setIsEditProductModalOpen}>
+      <Dialog
+        open={editProductModalOpen}
+        onOpenChange={setEditProductModalOpen}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Product {getProductDetails?.productName}</DialogTitle>
-            <DialogDescription>
-              Update the product details
-            </DialogDescription>
+            <DialogTitle>
+              Edit Product {editProductData.productName}
+            </DialogTitle>
+            <DialogDescription>Update the product details</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleUpdateProduct} className="space-y-4" encType="multipart/form-data">
+          <form
+            onSubmit={handleUpdateProduct}
+            className="space-y-4"
+            encType="multipart/form-data"
+          >
             <div className="space-y-2">
               <Label htmlFor="productName">Product Name</Label>
               <Input
-                type='input'
+                type="input"
                 id="productName"
                 name="productName"
                 value={editProductData.productName}
@@ -550,7 +603,7 @@ export function ProductsSection() {
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <Input
-                type='input'
+                type="input"
                 id="category"
                 name="category"
                 value={editProductData.category}
@@ -562,7 +615,7 @@ export function ProductsSection() {
             <div className="space-y-2">
               <Label htmlFor="price">Price</Label>
               <Input
-                type='input'
+                type="input"
                 id="price"
                 name="price"
                 min="1"
@@ -585,16 +638,18 @@ export function ProductsSection() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="image">Image <small className='text-red-500'>(Optional)*</small></Label>
+              <Label htmlFor="image">
+                Image <small className="text-red-500">(Optional)*</small>
+              </Label>
               <Input
                 id="image"
                 name="image"
                 type="file"
-                accept='image/*'
+                accept="image/*"
                 onChange={handleUpdateProductDataChange}
               />
-              <Activity mode={imagePreview ? "visible" : "hidden"}>
-                <div className='flex justify-center items-center'>
+              <Activity mode={imagePreview ? 'visible' : 'hidden'}>
+                <div className="flex justify-center items-center">
                   <img
                     src={imagePreview!!}
                     alt="Product preview"
@@ -607,7 +662,7 @@ export function ProductsSection() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsEditProductModalOpen(false)}
+                onClick={() => setEditProductModalOpen(false)}
               >
                 Cancel
               </Button>
@@ -626,19 +681,20 @@ export function ProductsSection() {
       </Dialog>
 
       {/* Archive Modal */}
-      <Dialog open={isArchiveModalOpen} onOpenChange={setIsArchiveModalOpen}>
+      <Dialog open={archiveProductModalOpen} onOpenChange={setArchiveProductModalOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Archive Item</DialogTitle>
             <DialogDescription>
-              Are you sure you want to archive this item? You can restore it later if needed.
+              Are you sure you want to archive this item? You can restore it
+              later if needed.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <div className="flex flex-row gap-1.5">
               <Button
                 variant={'secondary'}
-                onClick={() => setIsArchiveModalOpen(false)}
+                onClick={() => setArchiveProductModalOpen(false)}
               >
                 Cancel
               </Button>

@@ -7,6 +7,8 @@ export type User = {
   role: string
 }
 
+export type TFilterStatus = 'All' | 'In Stock' | 'Low Stock' | 'Out of Stock'
+
 export type TRegisterUserData = Omit<User, "id" | "role"> & {
   confirmPassword: string
 }

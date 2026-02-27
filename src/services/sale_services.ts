@@ -5,7 +5,7 @@ export const useAllProductSalesQuery = () => {
     return useQuery({
         queryFn: allProductSales,
         queryKey: ["transactions"],
-        staleTime: 1000 * 60
+        staleTime: 1000 * 60 * 5,
     })
 }
 
@@ -25,6 +25,7 @@ export const useTransactionProduct = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["transactions"] })
             queryClient.invalidateQueries({ queryKey: ["products"] })
+            queryClient.invalidateQueries({queryKey: ["product-insights"]})
         }
     })
 }

@@ -7,12 +7,11 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from './ui/dropdown-menu'
+import type { TFilterStatus } from '@/@types'
 
 interface FilteredByStatusProps {
-    filterStatus: 'All' | 'In Stock' | 'Low Stock' | 'Out of Stock'
-    setFilterStatus: React.Dispatch<
-        React.SetStateAction<'All' | 'In Stock' | 'Low Stock' | 'Out of Stock'>
-    >
+    filterStatus: TFilterStatus
+    setFilterStatus: (value: TFilterStatus) => void
     totalFiltered: number;
 }
 

@@ -26,7 +26,7 @@ export const useCheckAuthQuery = () => {
         queryFn: checkAuth,
         queryKey: ['me'],
         retry: false,
-        staleTime: 1000 * 60,
+        staleTime: 5 * 60 * 1000,
     })
 }
 

@@ -20,7 +20,11 @@ import type { SaleWithDetails, StockAlert } from '@/@types'
 import { ProtectedRoute } from '@/middleware'
 import TransactionSection from '@/components/dashboard/TransactionSection'
 import ArchiveSection from '@/components/dashboard/ArchiveSection'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
 
 export const Route = createFileRoute('/dashboard/')({
@@ -33,19 +37,47 @@ export const Route = createFileRoute('/dashboard/')({
 
 function RouteComponent() {
   const [activeSection, setActiveSection] = useState<
-    'overview' | 'products' | 'sales' | 'stocks' | 'settings' | 'transactions' | 'archive'
+    | 'overview'
+    | 'products'
+    | 'sales'
+    | 'stocks'
+    | 'settings'
+    | 'transactions'
+    | 'archive'
   >('overview')
 
   return (
-    <SidebarProvider className='flex flex-row relative' data-collapsible="icon">
-      <DashboardContent activeSection={activeSection} setActiveSection={setActiveSection} />
+    <SidebarProvider className="flex flex-row relative" data-collapsible="icon">
+      <DashboardContent
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+      />
     </SidebarProvider>
   )
 }
 
-function DashboardContent({ activeSection, setActiveSection }: {
-  activeSection: 'overview' | 'products' | 'sales' | 'stocks' | 'settings' | 'transactions' | 'archive'
-  setActiveSection: (section: 'overview' | 'products' | 'sales' | 'stocks' | 'settings' | 'transactions' | 'archive') => void
+function DashboardContent({
+  activeSection,
+  setActiveSection,
+}: {
+  activeSection:
+    | 'overview'
+    | 'products'
+    | 'sales'
+    | 'stocks'
+    | 'settings'
+    | 'transactions'
+    | 'archive'
+  setActiveSection: (
+    section:
+      | 'overview'
+      | 'products'
+      | 'sales'
+      | 'stocks'
+      | 'settings'
+      | 'transactions'
+      | 'archive',
+  ) => void
 }) {
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false)
   const { open } = React.useContext(SidebarContext)
@@ -78,8 +110,10 @@ function DashboardContent({ activeSection, setActiveSection }: {
       status: getStockAlertStatus(p),
     }))
 
-
-  const totalRevenue = sales.reduce((sum, sale) => sum + Number(sale.totalAmount), 0)
+  const totalRevenue = sales.reduce(
+    (sum, sale) => sum + Number(sale.totalAmount),
+    0,
+  )
   const totalProducts = products.length
   const lowStockItems = products.filter(
     (p) => Number(p.stockQuantity) <= 5 && Number(p.stockQuantity) > 0,
@@ -95,7 +129,9 @@ function DashboardContent({ activeSection, setActiveSection }: {
         activeSection={activeSection}
         onSectionChange={setActiveSection}
       />
-      <SidebarInset className={`flex-1 transition-[margin] duration-300 ease-linear ${open ? 'lg:ml-[var(--sidebar-width)]' : 'lg:ml-[var(--sidebar-width-icon)]'}`}>
+      <SidebarInset
+        className={`flex-1 transition-[margin] duration-300 ease-linear ${open ? 'lg:ml-[var(--sidebar-width)]' : 'lg:ml-[var(--sidebar-width-icon)]'}`}
+      >
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <div className="flex flex-1 items-center gap-2">
             <SidebarTrigger>
@@ -113,56 +149,81 @@ function DashboardContent({ activeSection, setActiveSection }: {
           </div>
           <Popover>
             <PopoverTrigger asChild>
-              <div className='relative' onClick={() => setIsNotificationOpen((prev) => !prev)} >
-                <div className='absolute -top-3 left-2 bg-red-500 w-4.5 h-4.5 rounded-full flex justify-center items-center'>
-                  <span className='text-white text-[10px] font-bold'>{Number(insights.length)}</span>
+              <div
+                className="relative"
+                onClick={() => setIsNotificationOpen((prev) => !prev)}
+              >
+                <div className="absolute -top-3 left-2 bg-red-500 w-4.5 h-4.5 rounded-full flex justify-center items-center">
+                  <span className="text-white text-[10px] font-bold">
+                    {Number(insights.length)}
+                  </span>
                 </div>
                 <Bell size={20} />
               </div>
             </PopoverTrigger>
-            <PopoverContent className='mr-6 w-96 p-0 z-50'>
-              <Activity mode={isNotificationOpen ? "visible" : "hidden"}>
-                <div className='p-4'>
-                  <header className='mb-4 pb-4 border-b'>
-                    <div className='flex flex-row gap-2 items-center mb-2'>
-                      <div className='p-1.5 rounded-lg bg-primary/10'>
-                        <BellDot size={18} className='text-primary' />
+            <PopoverContent className="mr-6 w-96 p-0 z-50">
+              <Activity mode={isNotificationOpen ? 'visible' : 'hidden'}>
+                <div className="p-4">
+                  <header className="mb-4 pb-4 border-b">
+                    <div className="flex flex-row gap-2 items-center mb-2">
+                      <div className="p-1.5 rounded-lg bg-primary/10">
+                        <BellDot size={18} className="text-primary" />
                       </div>
-                      <h1 className='text-lg font-semibold text-foreground'>Notifications</h1>
+                      <h1 className="text-lg font-semibold text-foreground">
+                        Notifications
+                      </h1>
                     </div>
-                    <p className='text-sm text-muted-foreground ml-10'>Important notifications about your inventory</p>
+                    <p className="text-sm text-muted-foreground ml-10">
+                      Important notifications about your inventory
+                    </p>
                   </header>
-                  <div className='space-y-2 max-h-[400px] overflow-y-auto'>
+                  <div className="space-y-2 max-h-[400px] overflow-y-auto">
                     {Number(insights.length) === 0 ? (
-                      <div className='flex flex-col items-center justify-center py-8 text-center'>
-                        <Bell size={32} className='text-muted-foreground mb-2 opacity-50' />
-                        <p className='text-sm text-muted-foreground'>No notifications at this time</p>
+                      <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <Bell
+                          size={32}
+                          className="text-muted-foreground mb-2 opacity-50"
+                        />
+                        <p className="text-sm text-muted-foreground">
+                          No notifications at this time
+                        </p>
                       </div>
                     ) : (
                       insights.map((item) => (
                         <div
                           key={item.productId}
-                          className='group relative p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer'
+                          className="group relative p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
                         >
-                          <div className='flex items-start gap-3'>
-                            <div className='mt-0.5 p-1.5 rounded-full bg-destructive/10 group-hover:bg-destructive/20 transition-colors'>
-                              <AlertCircle size={16} className='text-destructive' />
+                          <div className="flex items-start gap-3">
+                            <div className="mt-0.5 p-1.5 rounded-full bg-destructive/10 group-hover:bg-destructive/20 transition-colors">
+                              <AlertCircle
+                                size={16}
+                                className="text-destructive"
+                              />
                             </div>
-                            <div className='flex-1 min-w-0'>
-                              <div className='flex items-start justify-between gap-2 mb-1.5'>
-                                <h3 className='font-semibold text-sm text-foreground leading-tight'>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2 mb-1.5">
+                                <h3 className="font-semibold text-sm text-foreground leading-tight">
                                   {item.productName}
                                 </h3>
                                 <Badge
-                                  variant={item.stockQuantity === 0 ? 'destructive' : 'secondary'}
-                                  className='shrink-0 text-xs'
+                                  variant={
+                                    item.stockQuantity === 0
+                                      ? 'destructive'
+                                      : 'secondary'
+                                  }
+                                  className="shrink-0 text-xs"
                                 >
                                   {item.status}
                                 </Badge>
                               </div>
-                              <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-                                <span className='font-medium'>{item.stockQuantity}</span>
-                                <span className='text-muted-foreground/60'>units remaining</span>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <span className="font-medium">
+                                  {item.stockQuantity}
+                                </span>
+                                <span className="text-muted-foreground/60">
+                                  units remaining
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -188,13 +249,9 @@ function DashboardContent({ activeSection, setActiveSection }: {
             />
           )}
 
-          {activeSection === 'products' && (
-            <ProductsSection />
-          )}
+          {activeSection === 'products' && <ProductsSection />}
 
-          {activeSection === 'sales' && (
-            <SalesSection />
-          )}
+          {activeSection === 'sales' && <SalesSection />}
 
           {activeSection === 'stocks' && (
             <StocksSection
@@ -206,11 +263,9 @@ function DashboardContent({ activeSection, setActiveSection }: {
 
           {activeSection === 'settings' && <SettingsSection />}
 
-          {activeSection === 'transactions' && (
-            <TransactionSection />
-          )}
+          {activeSection === 'transactions' && <TransactionSection />}
 
-          {activeSection === 'archive' && (<ArchiveSection />)}
+          {activeSection === 'archive' && <ArchiveSection />}
         </div>
       </SidebarInset>
     </>

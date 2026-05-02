@@ -6,12 +6,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { TRegisterUserData } from '@/@types'
 import { useRegisterUserMutation } from '@/services/user_services'
-import { Eye, EyeClosed } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 
 interface RegisterProps {
   open: boolean
@@ -19,23 +18,20 @@ interface RegisterProps {
 }
 
 export function Register({ open, onOpenChange }: RegisterProps) {
-  const register = useRegisterUserMutation();
+  const register = useRegisterUserMutation()
   const [isShowPassword, setIsShowPassword] = useState(false)
   const [isShowConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('')
   const [formData, setFormData] = useState<TRegisterUserData>({
-    firstName: "",
-    lastName: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
+    firstName: '',
+    lastName: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
   })
 
   const passwordMismatch =
-    formData.password &&
-    formData.confirmPassword &&
-    formData.password !== formData.confirmPassword
-
+    formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword
 
   const isFormValid =
     formData.firstName &&
@@ -47,139 +43,125 @@ export function Register({ open, onOpenChange }: RegisterProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    let isError = false
-
     if (formData.confirmPassword !== formData.password) {
-      setMessage("Password does not match")
-      isError = true
+      setMessage('Passwords do not match')
+      return
     }
-
-    if (isError) return
-
     register.mutate(formData, {
       onSuccess: () => {
         onOpenChange(false)
-        setFormData({
-          firstName: "",
-          lastName: "",
-          username: "",
-          password: "",
-          confirmPassword: "",
-        });
+        setFormData({ firstName: '', lastName: '', username: '', password: '', confirmPassword: '' })
       },
       onError: (err: any) => {
-        if (err.response) {
-          console.log(err.response?.data.error);
-        }
-      }
+        if (err.response) setMessage(err.response?.data.error)
+      },
     })
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    if (message) setMessage('')
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
+
+  const inputCls = 'h-10 rounded-lg bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-300 hover:border-zinc-300 focus-visible:border-zinc-900 focus-visible:ring-zinc-900/10 transition-colors'
+  const labelCls = 'text-zinc-500 text-xs font-medium uppercase tracking-widest'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-130">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Register for StockWise</DialogTitle>
-          <DialogDescription>
-            Create a new account to access the StockWise. Please fill in
-            all the required information.
+          <DialogTitle className="text-lg font-bold text-zinc-900">Create an account</DialogTitle>
+          <DialogDescription className="text-zinc-400 text-sm">
+            Fill in your details to register for StockWise.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">First Name</Label>
-            <Input
-              id="firstName"
-              name="firstName"
-              type="text"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
-              placeholder="Enter your first name"
-            />
+
+        <form onSubmit={handleSubmit} className="space-y-4 pt-1">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="firstName" className={labelCls}>First Name</Label>
+              <Input id="firstName" name="firstName" type="text" value={formData.firstName} onChange={handleChange} required placeholder="First name" className={inputCls} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="lastName" className={labelCls}>Last Name</Label>
+              <Input id="lastName" name="lastName" type="text" value={formData.lastName} onChange={handleChange} required placeholder="Last name" className={inputCls} />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
-            <Input
-              id="lastName"
-              name="lastName"
-              type="text"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
-              placeholder="Enter your last name"
-            />
+
+          <div className="space-y-1.5">
+            <Label htmlFor="username" className={labelCls}>Username</Label>
+            <Input id="username" name="username" type="text" value={formData.username} onChange={handleChange} required placeholder="Choose a username" className={inputCls} />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              name="username"
-              type="text"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              placeholder="Choose a username"
-            />
-          </div>
-          <div className='relative'>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="password" className={labelCls}>Password</Label>
+            <div className="relative">
               <Input
                 id="password"
                 name="password"
-                type={isShowPassword ? "text" : "password"}
+                type={isShowPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleChange}
                 required
                 placeholder="Create a password"
+                className={`${inputCls} pr-10`}
               />
               {formData.password.length > 0 && (
-                isShowPassword ? <Eye onClick={() => setIsShowPassword(false)} className='text-gray-300 text-sm absolute top-7 right-2.5' /> :
-                  <EyeClosed onClick={() => setIsShowPassword(true)} className='text-gray-300 text-sm absolute top-7 right-2.5' />
-              )
-              }
+                <button
+                  type="button"
+                  onClick={() => setIsShowPassword((v) => !v)}
+                  tabIndex={-1}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-zinc-300 hover:text-zinc-600 transition-colors"
+                >
+                  {isShowPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              )}
             </div>
           </div>
-          <div className='relative'>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="confirmPassword" className={labelCls}>Confirm Password</Label>
+            <div className="relative">
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
-                type={isShowConfirmPassword ? "text" : "password"}
+                type={isShowConfirmPassword ? 'text' : 'password'}
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
                 placeholder="Confirm your password"
-                className={`${message ? "ring-2 ring-red-500" : ""}`}
+                className={`${inputCls} pr-10 ${message ? 'border-red-300 focus-visible:border-red-400' : ''}`}
               />
               {formData.confirmPassword.length > 0 && (
-                isShowConfirmPassword ? <Eye onClick={() => setShowConfirmPassword(false)} className='text-gray-300 text-sm absolute top-7 right-2.5' /> :
-                  <EyeClosed onClick={() => setShowConfirmPassword(true)} className='text-gray-300 text-sm absolute top-7 right-2.5' />
-              )
-              }
-              {message && <span className='text-sm -mt-2 text-red-500'>{message}</span>}
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  tabIndex={-1}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-zinc-300 hover:text-zinc-600 transition-colors"
+                >
+                  {isShowConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              )}
             </div>
+            {message && <p className="text-xs text-red-500">{message}</p>}
           </div>
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              disabled={!isFormValid}
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button
               type="button"
-              variant="outline"
               onClick={() => onOpenChange(false)}
+              className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
             >
               Cancel
-            </Button>
-            <Button variant={`${formData.firstName.length && formData.lastName.length && formData.username.length && formData.password.length > 0 ? "default" : "secondary"}`} type="submit">Register</Button>
+            </button>
+            <button
+              type="submit"
+              disabled={!isFormValid}
+              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              Create account
+            </button>
           </div>
         </form>
       </DialogContent>

@@ -24,7 +24,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -79,15 +78,7 @@ export function ProductsSection() {
   } = useProductStore()
 
   const { filterStatus, setFilterStatus } = useFilterProductStore()
-
-  const {
-    editProductModalOpen,
-    setEditProductModalOpen,
-    archiveProductModalOpen,
-    setArchiveProductModalOpen,
-    addProductDialogOpen,
-    setAddProductDialogOpen
-  } = useModalProductStore()
+  const { editProductModalOpen, setEditProductModalOpen, archiveProductModalOpen, setArchiveProductModalOpen, addProductDialogOpen, setAddProductDialogOpen } = useModalProductStore()
 
   const { products } = useProducts(searchTerm)
   const register = useRegisterProductMutation()
@@ -103,7 +94,7 @@ export function ProductsSection() {
   const isSubmitting = useSubmitting()
   const setIsSubmitting = useSetSubmitting()
 
-  const getProductDetails = products.find((product) => product.id == productId)
+  const getProductDetails = products.find((p) => p.id == productId)
 
   useEffect(() => {
     if (editProductModalOpen && getProductDetails) {
@@ -116,565 +107,293 @@ export function ProductsSection() {
     }
   }, [editProductModalOpen, getProductDetails])
 
-  // Handle Add Product Change
   const handleProductFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target
-
     if (name === 'image' && files) {
       const file = files[0]
-
-      setProductData(({ image: file || null }))
-
-      const previewUrl = URL.createObjectURL(file)
-      setImagePreview(previewUrl)
+      setProductData({ image: file || null })
+      setImagePreview(URL.createObjectURL(file))
       return
     }
-
     setProductData({
-      [name]:
-        name === 'productName' ||
-          name === 'category' ||
-          name === 'stockQuantity'
-          ? value
-          : parseFloat(value) || 0,
+      [name]: name === 'productName' || name === 'category' || name === 'stockQuantity' ? value : parseFloat(value) || 0,
     })
   }
 
   const handleOpenEditModal = (product: Product) => {
     setProductId(product.id)
-  
-    setEditProductData({
-      productName: product.productName,
-      category: product.category,
-      price: product.price,
-      stockQuantity: product.stockQuantity,
-    })
+    setEditProductData({ productName: product.productName, category: product.category, price: product.price, stockQuantity: product.stockQuantity })
     setEditProductModalOpen(true)
   }
 
-  // Handle Edit Product Change
-  const handleUpdateProductDataChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleUpdateProductDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-
-    setEditProductData({
-      [name]:
-        name === 'productName' || name === 'category' ? value : Number(value),
-    })
+    setEditProductData({ [name]: name === 'productName' || name === 'category' ? value : Number(value) })
   }
 
-  // Submit Product Created
   const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setIsError(false)
     setIsSuccess(false)
     setMessage('')
-
     await register.mutateAsync(productData, {
       onSuccess: (data) => {
         setIsSuccess(true)
         setMessage(data.message)
         setAddProductDialogOpen(false)
-
-        setTimeout(() => {
-          resetProductData()
-          setIsSuccess(false)
-          setMessage('')
-          setIsSubmitting(false)
-        }, 3500)
+        setTimeout(() => { resetProductData(); setIsSuccess(false); setMessage(''); setIsSubmitting(false) }, 3500)
       },
       onError: (err: any) => {
         setIsError(true)
         setIsSubmitting(false)
         setAddProductDialogOpen(true)
-        if (err.response) {
-          setMessage(err.response?.data.error)
-          console.error('Error registering product:', err.response?.data.error)
-        }
+        if (err.response) setMessage(err.response?.data.error)
       },
     })
   }
 
-  // Update Product By Id
   const handleUpdateProduct = async (e: React.FormEvent) => {
     e.preventDefault()
-
     if (!productId) return
-
-    await updateProduct.mutateAsync(
-      { id: productId as string, data: editProductData },
-      {
-        onSuccess: (data) => {
-          setIsSuccess(true)
-          setMessage(data.message)
-          setEditProductModalOpen(false)
-
-          setTimeout(() => {
-            setEditProductData({
-              productName: '',
-              category: '',
-              price: 0,
-              stockQuantity: 0,
-            })
-            setIsSuccess(false)
-            setMessage('')
-            setIsSubmitting(false)
-          }, 3500)
-        },
-        onError: (err: any) => {
-          setIsError(true)
-          setMessage(err.response?.data?.error || 'Update failed')
-        },
+    await updateProduct.mutateAsync({ id: productId as string, data: editProductData }, {
+      onSuccess: (data) => {
+        setIsSuccess(true)
+        setMessage(data.message)
+        setEditProductModalOpen(false)
+        setTimeout(() => { setEditProductData({ productName: '', category: '', price: 0, stockQuantity: 0 }); setIsSuccess(false); setMessage(''); setIsSubmitting(false) }, 3500)
       },
-    )
+      onError: (err: any) => {
+        setIsError(true)
+        setMessage(err.response?.data?.error || 'Update failed')
+      },
+    })
   }
 
-  // Archive Product
   const handleArchiveProduct = async (e: React.FormEvent) => {
     e.preventDefault()
     await archive.mutateAsync(productId, {
       onSuccess: (data) => {
         setIsSuccess(true)
         setMessage(data.message)
-        setIsError(true)
         setArchiveProductModalOpen(false)
-
-        setTimeout(() => {
-          setIsSuccess(false)
-          setMessage('')
-          setProductId(null)
-          setIsError(false)
-        }, 3500)
+        setTimeout(() => { setIsSuccess(false); setMessage(''); setProductId(null) }, 3500)
       },
     })
   }
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      if (filterStatus === 'All') return true
-      return getProductStatus(product) === filterStatus
-    })
+    return products.filter((p) => filterStatus === 'All' || getProductStatus(p) === filterStatus)
   }, [products, filterStatus])
 
-  const totalFiltered = filteredProducts.length
+  const inputCls = 'h-10 rounded-lg bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-300 hover:border-zinc-300 focus-visible:border-zinc-900 focus-visible:ring-zinc-900/10 transition-colors'
+  const labelCls = 'text-zinc-500 text-xs font-medium uppercase tracking-widest'
 
   return (
     <>
       <Activity mode={isSuccess ? 'visible' : 'hidden'}>
-        <Alert className="animate-fade-in-out bg-green-500 w-70 absolute right-2 top-4">
-          <CheckCircle2Icon color="white" />
+        <Alert className="animate-fade-in-out bg-zinc-900 w-72 absolute right-2 top-4 border-0">
+          <CheckCircle2Icon color="white" className="size-4" />
           <AlertTitle>
-            <span className="text-white text-[16px] font-bold">{message}</span>
+            <span className="text-white text-sm font-medium">{message}</span>
           </AlertTitle>
         </Alert>
       </Activity>
 
-      {/* Product Card Table */}
-      <Card className="h-200">
+      <Card className="border-zinc-100 shadow-none">
         <CardHeader>
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Products</CardTitle>
-                <CardDescription>Manage your product inventory</CardDescription>
+                <CardTitle className="text-base font-semibold text-zinc-900">Products</CardTitle>
+                <CardDescription className="text-zinc-400">Manage your product inventory</CardDescription>
               </div>
-              <Button
-                className="hidden md:flex"
+              <button
                 onClick={() => setAddProductDialogOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700 transition-colors"
               >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Product
-              </Button>
-              <Button
-                className="md:hidden"
-                onClick={() => setAddProductDialogOpen(true)}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-              </Button>
+                <Plus className="size-4" />
+                <span className="hidden sm:inline">Add Product</span>
+              </button>
             </div>
-            <div className="flex flex-col gap-2">
-              <div>
-                <form
-                  onSubmit={(e: FormEvent) => {
-                    e.preventDefault()
-                    setSearchTerm(searchInput)
-                  }}
-                  method="post"
-                >
-                  <div className="w-md flex flex-row gap-2">
-                    <Input
-                      className="py-6 px-4"
-                      placeholder="Search your product..."
-                      value={searchInput}
-                      onChange={(e) => setSearchInput(e.target.value)}
-                    />
-                    <Button type="button" className="py-6 px-6 hidden md:flex">
-                      Search
-                    </Button>
-                    <Button type="button" className="py-6 px-6 md:hidden">
-                      <Search />
-                    </Button>
-                  </div>
-                </form>
-              </div>
-              <div className="mt-2 -mb-5">
-                <div className="flex flex-row justify-between">
-                  <FilteredByStatus
-                    filterStatus={filterStatus}
-                    setFilterStatus={setFilterStatus}
-                    totalFiltered={totalFiltered}
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <form onSubmit={(e: FormEvent) => { e.preventDefault(); setSearchTerm(searchInput) }} className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+                  <Input
+                    className={`pl-9 h-9 w-64 ${inputCls}`}
+                    placeholder="Search product..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
                   />
-                  <ExcelImportButton />
                 </div>
+                <button type="submit" className="h-9 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-700 transition-colors">
+                  Search
+                </button>
+              </form>
+              <div className="flex items-center gap-2">
+                <FilteredByStatus filterStatus={filterStatus} setFilterStatus={setFilterStatus} totalFiltered={filteredProducts.length} />
+                <ExcelImportButton />
               </div>
             </div>
           </div>
-          <div></div>
         </CardHeader>
-        <CardContent>
-          <div className="relative min-h-150 overflow-hidden">
-            <div className="max-h-150 overflow-y-auto">
-              <Table className="w-full">
-                <TableHeader className="sticky top-0 bg-white z-10">
-                  <TableRow>
-                    {[
-                      'Image',
-                      'Name',
-                      'Category',
-                      'Price',
-                      'Stock',
-                      'Status',
-                      'BarCode',
-                      'Created At',
-                      'Updated At',
-                      'Action',
-                    ].map((item) => (
-                      <TableHead key={item}>{item}</TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
 
-                <TableBody>
-                  {filteredProducts.map((product) => {
-                    const status = getProductStatus(product)
-                    return (
-                      <TableRow key={product.id}>
-                        <TableCell>
-                          {product.image ? (
-                            <img
-                              className="w-12 h-12 object-cover rounded"
-                              src={
-                                typeof product.image == 'string'
-                                  ? product.image
-                                  : ''
-                              }
-                              alt={product.productName || 'Product image'}
-                            />
-                          ) : (
-                            <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-500 text-xs">
-                              No Image
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>{product.productName}</TableCell>
-                        <TableCell>{product.category}</TableCell>
-                        <TableCell>
-                          &#8369; {formatCurrency(product.price)}
-                        </TableCell>
-                        <TableCell>{product.stockQuantity}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              status === 'In Stock'
-                                ? 'default'
-                                : status === 'Low Stock'
-                                  ? 'secondary'
-                                  : 'destructive'
-                            }
+        <CardContent>
+          <div className="max-h-[600px] overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-zinc-100">
+                  {['Image', 'Name', 'Category', 'Price', 'Stock', 'Status', 'Barcode', 'Created', 'Updated', 'Actions'].map((h) => (
+                    <TableHead key={h} className="sticky top-0 bg-white text-xs text-zinc-400 font-medium z-10">{h}</TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredProducts.map((product) => {
+                  const status = getProductStatus(product)
+                  return (
+                    <TableRow key={product.id} className="border-zinc-50">
+                      <TableCell>
+                        {product.image ? (
+                          <img className="w-10 h-10 object-cover rounded-lg border border-zinc-100" src={typeof product.image === 'string' ? product.image : ''} alt={product.productName} />
+                        ) : (
+                          <div className="w-10 h-10 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-400 text-xs">N/A</div>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium text-zinc-900">{product.productName}</TableCell>
+                      <TableCell className="text-zinc-500">{product.category}</TableCell>
+                      <TableCell className="text-zinc-900 font-medium">₱{formatCurrency(product.price)}</TableCell>
+                      <TableCell className="text-zinc-700">{product.stockQuantity}</TableCell>
+                      <TableCell>
+                        <Badge variant={status === 'In Stock' ? 'default' : status === 'Low Stock' ? 'secondary' : 'destructive'} className="text-xs">
+                          {status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <img className="w-10 h-10 object-cover rounded border border-zinc-100" src={`data:image/png;base64,${product.barCode}`} alt="barcode" />
+                      </TableCell>
+                      <TableCell className="text-xs text-zinc-400">{formatDateTime(product.createdAt)}</TableCell>
+                      <TableCell className="text-xs text-zinc-400">{formatDateTime(product.updatedAt)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            title="Edit"
+                            onClick={() => handleOpenEditModal(product)}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-blue-100 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-100 transition-colors"
                           >
-                            {status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <img
-                            className="w-12 h-12 object-cover rounded"
-                            src={`data:image/png;base64,${product.barCode}`}
-                            alt="barcode img"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {formatDateTime(product.createdAt)}
-                        </TableCell>
-                        <TableCell>
-                          {formatDateTime(product.updatedAt)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-row gap-1.5">
-                            <EditIcon
-                              className="text-blue-500 hover:text-blue-700"
-                              onClick={() => {
-                                handleOpenEditModal(product)
-                              }}
-                            />
-                            <ArchiveIcon
-                              onClick={() => {
-                                setArchiveProductModalOpen(true)
-                                setProductId(product.id)
-                              }}
-                              className="text-orange-500 hover:text-orange-700"
-                            />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                  {products.length == 0 && (
-                    <TableRow>
-                      <TableCell colSpan={9}>
-                        <div className="flex flex-col h-120 items-center justify-center py-10 text-muted-foreground">
-                          <PackageIcon className="mb-3 h-10 w-10 text-gray-400" />
-                          <p className="text-base font-medium">
-                            No products found
-                          </p>
-                          <p className="text-sm">
-                            Click &quot;Add Product&quot; to create your first
-                            item.
-                          </p>
+                            <EditIcon className="size-3.5" />
+                            Edit
+                          </button>
+                          <button
+                            title="Archive"
+                            onClick={() => { setArchiveProductModalOpen(true); setProductId(product.id) }}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-amber-100 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-600 hover:bg-amber-100 transition-colors"
+                          >
+                            <ArchiveIcon className="size-3.5" />
+                            Archive
+                          </button>
                         </div>
                       </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                  )
+                })}
+                {products.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={10} className="h-40 text-center">
+                      <div className="flex flex-col items-center gap-2 text-zinc-300">
+                        <PackageIcon className="h-8 w-8" />
+                        <p className="text-sm font-medium">No products found</p>
+                        <p className="text-xs">Click "Add Product" to create your first item</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
 
       {/* Add Product Modal */}
-      <Dialog
-        open={addProductDialogOpen}
-        onOpenChange={setAddProductDialogOpen}
-      >
+      <Dialog open={addProductDialogOpen} onOpenChange={setAddProductDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Product</DialogTitle>
-            <DialogDescription>
-              Enter the product details below to add a new item to your
-              inventory.
-            </DialogDescription>
+            <DialogTitle className="text-zinc-900 font-bold">Add New Product</DialogTitle>
+            <DialogDescription className="text-zinc-400">Enter product details to add to your inventory.</DialogDescription>
           </DialogHeader>
-          <form
-            onSubmit={handleProductSubmit}
-            className="space-y-4"
-            encType="multipart/form-data"
-          >
-            <div className="space-y-2">
-              <Label htmlFor="productName">Product Name</Label>
-              <Input
-                type="input"
-                id="productName"
-                name="productName"
-                value={productData.productName}
-                onChange={handleProductFormChange}
-                placeholder="Enter product name"
-                required
-                className={`${isError ? 'ring-2 ring-red-500' : ''}`}
-              />
-              <Activity mode={isError ? 'visible' : 'hidden'}>
-                <p className="text-red-500 text-sm">{message}</p>
-              </Activity>
+          <form onSubmit={handleProductSubmit} className="space-y-4" encType="multipart/form-data">
+            <div className="space-y-1.5">
+              <Label htmlFor="productName" className={labelCls}>Product Name</Label>
+              <Input id="productName" name="productName" value={productData.productName} onChange={handleProductFormChange} placeholder="Enter product name" required className={`${inputCls} ${isError ? 'border-red-300' : ''}`} />
+              {isError && <p className="text-xs text-red-500">{message}</p>}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Input
-                type="input"
-                id="category"
-                name="category"
-                value={productData.category}
-                onChange={handleProductFormChange}
-                placeholder="Enter category"
-                required
-              />
+            <div className="space-y-1.5">
+              <Label htmlFor="category" className={labelCls}>Category</Label>
+              <Input id="category" name="category" value={productData.category} onChange={handleProductFormChange} placeholder="Enter category" required className={inputCls} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="price">Price</Label>
-              <Input
-                type="input"
-                id="price"
-                name="price"
-                min="1"
-                value={productData.price}
-                onChange={handleProductFormChange}
-                placeholder="0.00"
-                required
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="price" className={labelCls}>Price</Label>
+                <Input id="price" name="price" min="1" value={productData.price} onChange={handleProductFormChange} placeholder="0.00" required className={inputCls} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="stockQuantity" className={labelCls}>Stock Qty</Label>
+                <Input id="stockQuantity" name="stockQuantity" value={productData.stockQuantity} onChange={handleProductFormChange} placeholder="0" required className={inputCls} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="stockQuantity">Stock Quantity</Label>
-              <Input
-                id="stockQuantity"
-                name="stockQuantity"
-                type="input"
-                value={productData.stockQuantity}
-                onChange={handleProductFormChange}
-                placeholder="0"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="image">
-                Image <small className="text-red-500">(Optional)*</small>
-              </Label>
-              <Input
-                id="image"
-                name="image"
-                type="file"
-                accept="image/*"
-                onChange={handleProductFormChange}
-              />
-              <Activity mode={imagePreview ? 'visible' : 'hidden'}>
-                <div className="flex justify-center items-center">
-                  <img
-                    src={imagePreview!!}
-                    alt="Product preview"
-                    className="mt-2 h-30 w-35 object-cover rounded border"
-                  />
+            <div className="space-y-1.5">
+              <Label htmlFor="image" className={labelCls}>Image <span className="text-zinc-300 normal-case tracking-normal">(optional)</span></Label>
+              <Input id="image" name="image" type="file" accept="image/*" onChange={handleProductFormChange} className={inputCls} />
+              {imagePreview && (
+                <div className="flex justify-center mt-2">
+                  <img src={imagePreview} alt="Preview" className="h-28 w-32 object-cover rounded-lg border border-zinc-100" />
                 </div>
-              </Activity>
+              )}
             </div>
-            <div className="flex justify-end gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setAddProductDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <div className="w-full min-h-screen flex justify-center items-center">
-                    <div className="loader-1"></div>
-                  </div>
-                ) : (
-                  'Add Product'
-                )}
-              </Button>
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={() => setAddProductDialogOpen(false)} className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors">Cancel</button>
+              <button type="submit" disabled={isSubmitting} className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-30 transition-colors flex items-center gap-2">
+                {isSubmitting ? <div className="loader-1" /> : 'Add Product'}
+              </button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
       {/* Edit Product Modal */}
-      <Dialog
-        open={editProductModalOpen}
-        onOpenChange={setEditProductModalOpen}
-      >
+      <Dialog open={editProductModalOpen} onOpenChange={setEditProductModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              Edit Product {editProductData.productName}
-            </DialogTitle>
-            <DialogDescription>Update the product details</DialogDescription>
+            <DialogTitle className="text-zinc-900 font-bold">Edit Product</DialogTitle>
+            <DialogDescription className="text-zinc-400">Update the product details below.</DialogDescription>
           </DialogHeader>
-          <form
-            onSubmit={handleUpdateProduct}
-            className="space-y-4"
-            encType="multipart/form-data"
-          >
-            <div className="space-y-2">
-              <Label htmlFor="productName">Product Name</Label>
-              <Input
-                type="input"
-                id="productName"
-                name="productName"
-                value={editProductData.productName}
-                onChange={handleUpdateProductDataChange}
-                placeholder="Enter product name"
-                required
-                className={`${isError ? 'ring-2 ring-red-500' : ''}`}
-              />
-              <Activity mode={isError ? 'visible' : 'hidden'}>
-                <p className="text-red-500 text-sm">{message}</p>
-              </Activity>
+          <form onSubmit={handleUpdateProduct} className="space-y-4" encType="multipart/form-data">
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-productName" className={labelCls}>Product Name</Label>
+              <Input id="edit-productName" name="productName" value={editProductData.productName} onChange={handleUpdateProductDataChange} placeholder="Enter product name" required className={`${inputCls} ${isError ? 'border-red-300' : ''}`} />
+              {isError && <p className="text-xs text-red-500">{message}</p>}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Input
-                type="input"
-                id="category"
-                name="category"
-                value={editProductData.category}
-                onChange={handleUpdateProductDataChange}
-                placeholder="Enter category"
-                required
-              />
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-category" className={labelCls}>Category</Label>
+              <Input id="edit-category" name="category" value={editProductData.category} onChange={handleUpdateProductDataChange} placeholder="Enter category" required className={inputCls} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="price">Price</Label>
-              <Input
-                type="input"
-                id="price"
-                name="price"
-                min="1"
-                value={editProductData.price}
-                onChange={handleUpdateProductDataChange}
-                placeholder="0.00"
-                required
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-price" className={labelCls}>Price</Label>
+                <Input id="edit-price" name="price" min="1" value={editProductData.price} onChange={handleUpdateProductDataChange} placeholder="0.00" required className={inputCls} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-stockQuantity" className={labelCls}>Stock Qty</Label>
+                <Input id="edit-stockQuantity" name="stockQuantity" value={editProductData.stockQuantity} onChange={handleUpdateProductDataChange} placeholder="0" required className={inputCls} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="stockQuantity">Stock Quantity</Label>
-              <Input
-                id="stockQuantity"
-                name="stockQuantity"
-                type="input"
-                value={editProductData.stockQuantity}
-                onChange={handleUpdateProductDataChange}
-                placeholder="0"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="image">
-                Image <small className="text-red-500">(Optional)*</small>
-              </Label>
-              <Input
-                id="image"
-                name="image"
-                type="file"
-                accept="image/*"
-                onChange={handleUpdateProductDataChange}
-              />
-              <Activity mode={imagePreview ? 'visible' : 'hidden'}>
-                <div className="flex justify-center items-center">
-                  <img
-                    src={imagePreview!!}
-                    alt="Product preview"
-                    className="mt-2 h-30 w-35 object-cover rounded border"
-                  />
-                </div>
-              </Activity>
-            </div>
-            <div className="flex justify-end gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setEditProductModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">
-                {isSubmitting ? (
-                  <div className="w-full min-h-screen flex justify-center items-center">
-                    <div className="loader-1"></div>
-                  </div>
-                ) : (
-                  'Save Changes'
-                )}
-              </Button>
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={() => setEditProductModalOpen(false)} className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors">Cancel</button>
+              <button type="submit" disabled={isSubmitting} className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-30 transition-colors flex items-center gap-2">
+                {isSubmitting ? <div className="loader-1" /> : 'Save Changes'}
+              </button>
             </div>
           </form>
         </DialogContent>
@@ -684,26 +403,16 @@ export function ProductsSection() {
       <Dialog open={archiveProductModalOpen} onOpenChange={setArchiveProductModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Archive Item</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to archive this item? You can restore it
-              later if needed.
-            </DialogDescription>
+            <DialogTitle className="text-zinc-900 font-bold">Archive Item</DialogTitle>
+            <DialogDescription className="text-zinc-400">This item will be archived. You can restore it later.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <div className="flex flex-row gap-1.5">
-              <Button
-                variant={'secondary'}
-                onClick={() => setArchiveProductModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <form onSubmit={handleArchiveProduct} method="post">
-                <Button variant={'destructive'}>
-                  <span className="font-bold">Yes, Archive now</span>
-                </Button>
-              </form>
-            </div>
+            <button onClick={() => setArchiveProductModalOpen(false)} className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors">Cancel</button>
+            <form onSubmit={handleArchiveProduct}>
+              <button type="submit" className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 transition-colors">
+                Yes, Archive
+              </button>
+            </form>
           </DialogFooter>
         </DialogContent>
       </Dialog>

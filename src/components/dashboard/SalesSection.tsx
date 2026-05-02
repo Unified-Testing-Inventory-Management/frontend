@@ -1,4 +1,4 @@
-import { ShoppingCart } from 'lucide-react'
+import { ShoppingCart, Search } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
@@ -13,102 +13,91 @@ import { formatCurrency } from '@/utils/formatCurrency'
 import { Input } from '../ui/input'
 import { useState } from 'react'
 import { useProductSales } from '@/data'
-import { Button } from '../ui/button'
 
 export function SalesSection() {
-  const [searchInput, setSearchInput] = useState<string>("")
-  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [searchInput, setSearchInput] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
   const { sales } = useProductSales(searchTerm)
 
   return (
     <div className="space-y-4">
-      <Card>
+      <Card className="border-zinc-100 shadow-none">
         <CardHeader>
-          <CardTitle>Sales Overview</CardTitle>
-          <CardDescription className='-mt-1'>Complete sales transaction history</CardDescription>
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            setSearchTerm(searchInput)
-          }} method="post">
-            <div className='flex flex-row gap-2'>
-              <div className='w-sm'>
-                <Input className='py-6 px-4' placeholder='Search product sale...' onChange={(e) => setSearchInput(e.target.value)} />
-              </div>
-              <Button className='py-6 px-6'>
-                Search
-              </Button>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <CardTitle className="text-base font-semibold text-zinc-900">Sales Overview</CardTitle>
+              <CardDescription className="text-zinc-400">Complete sales transaction history</CardDescription>
             </div>
-          </form>
+            <form
+              onSubmit={(e) => { e.preventDefault(); setSearchTerm(searchInput) }}
+              className="flex items-center gap-2"
+            >
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+                <Input
+                  className="pl-9 h-9 w-64 rounded-lg bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-300 focus-visible:border-zinc-900 focus-visible:ring-zinc-900/10"
+                  placeholder="Search product sale..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                />
+              </div>
+              <button
+                type="submit"
+                className="h-9 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+              >
+                Search
+              </button>
+            </form>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="relative max-h-180 overflow-y-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {[
-                    "Sale ID",
-                    "Products",
-                    "Category",
-                    "Quantity",
-                    "Total Amount",
-                    "Sale Date",
-                  ].map((item) => (
-                    <TableHead
-                      key={item}
-                      className="sticky top-0 z-10 bg-white"
-                    >
-                      {item}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sales.map((sale) => (
-                  <TableRow key={sale.id}>
-                    <TableCell className="font-medium">{sale.id}</TableCell>
-                    <TableCell>
-                      {sale.saleDetails.map((item, idx) => (
-                        <div key={idx} className="text-sm">
-                          {item.productName} (&#8369;{formatCurrency(item.price)})
-                        </div>
-                      ))}
-                    </TableCell>
-
-                    <TableCell>
-                      {sale.saleDetails.map((item, idx) => (
-                        <div key={idx}>{item.category}</div>
-                      ))}
-                    </TableCell>
-
-                    <TableCell>
-                      {sale.saleDetails.reduce(
-                        (sum, item) => sum + item.quantity,
-                        0
-                      )}
-                    </TableCell>
-
-                    <TableCell>
-                      &#8369;{formatCurrency(sale.totalAmount)}
-                    </TableCell>
-
-                    <TableCell>
-                      {formatDateTime(sale.saleDate)}
-                    </TableCell>
+          {sales.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-20 text-zinc-300">
+              <ShoppingCart className="h-8 w-8" />
+              <p className="text-sm">No sales yet</p>
+            </div>
+          ) : (
+            <div className="relative max-h-[600px] overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-zinc-100">
+                    {['Sale ID', 'Products', 'Category', 'Qty', 'Total', 'Date'].map((h) => (
+                      <TableHead key={h} className="sticky top-0 bg-white text-xs text-zinc-400 font-medium z-10">{h}</TableHead>
+                    ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          <div>
-            {sales.length == 0 && (
-              <div className="w-full h-90 mt-5 flex flex-col justify-center items-center gap-2 py-4">
-                <ShoppingCart className="h-8 w-8 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  Don't have sales right now.
-                </span>
-              </div>
-            )}
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {sales.map((sale) => (
+                    <TableRow key={sale.id} className="border-zinc-50">
+                      <TableCell className="font-medium text-zinc-900">#{sale.id}</TableCell>
+                      <TableCell>
+                        {sale.saleDetails.map((item, idx) => (
+                          <div key={idx} className="text-sm text-zinc-700">
+                            {item.productName}
+                            <span className="text-zinc-400 ml-1">(₱{formatCurrency(item.price)})</span>
+                          </div>
+                        ))}
+                      </TableCell>
+                      <TableCell>
+                        {sale.saleDetails.map((item, idx) => (
+                          <div key={idx} className="text-sm text-zinc-500">{item.category}</div>
+                        ))}
+                      </TableCell>
+                      <TableCell className="text-zinc-700">
+                        {sale.saleDetails.reduce((sum, item) => sum + item.quantity, 0)}
+                      </TableCell>
+                      <TableCell className="font-semibold text-zinc-900">
+                        ₱{formatCurrency(sale.totalAmount)}
+                      </TableCell>
+                      <TableCell className="text-xs text-zinc-400">
+                        {formatDateTime(sale.saleDate)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

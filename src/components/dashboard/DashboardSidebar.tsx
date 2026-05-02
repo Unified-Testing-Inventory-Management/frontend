@@ -4,11 +4,11 @@ import {
   LayoutDashboard,
   ShoppingCart,
   TrendingUp,
+  Activity,
+  ArchiveIcon,
   Users,
   User,
   LogOut,
-  Activity,
-  ArchiveIcon,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -23,12 +23,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useLogoutUserMutation, UserData } from '@/services/user_services'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
@@ -47,52 +42,47 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
 
   const handleLogout = async (e: React.FormEvent) => {
     e.preventDefault()
-
     logout.mutateAsync(undefined, {
       onSuccess: () => {
         queryClient.clear()
         navigate({ to: '/' })
       },
-      onError: (err: any) => {
-        if (err.response) {
-          console.log(err.response?.data.error)
-        }
-      },
     })
   }
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Overview', value: 'overview' },
-    { icon: Package, label: 'Products', value: 'products' },
-    { icon: ShoppingCart, label: 'Sales', value: 'sales' },
-    { icon: TrendingUp, label: 'Stocks', value: 'stocks' },
-    { icon: Activity, label: 'Transactions', value: 'transactions' },
+    { icon: LayoutDashboard, label: 'Overview',     value: 'overview'      },
+    { icon: Package,         label: 'Products',     value: 'products'      },
+    { icon: ShoppingCart,    label: 'Sales',        value: 'sales'         },
+    { icon: TrendingUp,      label: 'Stocks',       value: 'stocks'        },
+    { icon: Activity,        label: 'Transactions', value: 'transactions'  },
   ]
 
-  const othersItem = [
-    { icon: ArchiveIcon, label: 'Archive', value: 'archive' }
+  const othersItems = [
+    { icon: ArchiveIcon, label: 'Archive', value: 'archive' },
   ]
 
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <div className="flex items-center gap-2.5 px-2 py-4">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-white shrink-0">
             <Package className="h-4 w-4" />
           </div>
           {open && (
             <div className="flex flex-col">
-              <span className="font-semibold">StockWise</span>
-              <span className="text-xs text-muted-foreground">Management</span>
+              <span className="font-semibold text-zinc-900 text-sm">StockWise</span>
+              <span className="text-xs text-zinc-400">Management</span>
             </div>
           )}
         </div>
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
-          {open && <SidebarGroupLabel>Dashboard</SidebarGroupLabel>}
+          {open && <SidebarGroupLabel className="text-xs text-zinc-400 uppercase tracking-widest px-2">Dashboard</SidebarGroupLabel>}
           <SidebarGroupContent>
-            <SidebarMenu className={`${!open ? "flex flex-col justify-center items-center" : ""}`}>
+            <SidebarMenu className={!open ? 'flex flex-col items-center' : ''}>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.value}>
                   <SidebarMenuButton
@@ -109,11 +99,12 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
         <SidebarGroup>
-          {open && <SidebarGroupLabel>Others</SidebarGroupLabel>}
+          {open && <SidebarGroupLabel className="text-xs text-zinc-400 uppercase tracking-widest px-2">Others</SidebarGroupLabel>}
           <SidebarGroupContent>
-            <SidebarMenu className={`${!open ? "flex flex-col justify-center items-center" : ""}`}>
-              {othersItem.map((item) => (
+            <SidebarMenu className={!open ? 'flex flex-col items-center' : ''}>
+              {othersItems.map((item) => (
                 <SidebarMenuItem key={item.value}>
                   <SidebarMenuButton
                     onClick={() => onSectionChange(item.value as any)}
@@ -130,49 +121,46 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <Popover>
               <PopoverTrigger asChild>
                 <SidebarMenuButton size="lg">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-zinc-900 text-white shrink-0">
                     <Users className="size-4" />
                   </div>
                   {open && (
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">
-                        {user
-                          ? `${user.firstName} ${user.lastName}`
-                          : 'Admin User'}
+                      <span className="truncate font-semibold text-zinc-900">
+                        {user ? `${user.firstName} ${user.lastName}` : 'Admin User'}
                       </span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        {user ? user.username : 'admin@example.com'}
+                      <span className="truncate text-xs text-zinc-400">
+                        {user ? user.username : 'admin'}
                       </span>
                     </div>
                   )}
                 </SidebarMenuButton>
               </PopoverTrigger>
-              <PopoverContent className="w-56 p-2" align="end" side="top">
-                <div className="flex flex-col gap-1">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => {
-                      onSectionChange('settings')
-                    }}
+              <PopoverContent className="w-52 p-1.5" align="end" side="top">
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => onSectionChange('settings')}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 transition-colors w-full text-left"
                   >
-                    <User className="mr-2 h-4 w-4" />
+                    <User className="h-4 w-4 text-zinc-400" />
                     My Account
-                  </Button>
+                  </button>
                   <form onSubmit={handleLogout}>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-destructive hover:text-destructive"
+                    <button
+                      type="submit"
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors w-full text-left"
                     >
-                      <LogOut className="mr-2 h-4 w-4" />
+                      <LogOut className="h-4 w-4" />
                       Logout
-                    </Button>
+                    </button>
                   </form>
                 </div>
               </PopoverContent>

@@ -26,9 +26,8 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
 import { getProductStatus } from '@/@types'
-import { CheckCircle2Icon, PackageIcon } from 'lucide-react'
+import { CheckCircle2Icon, PackageIcon, Search } from 'lucide-react'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { useTransactionProduct } from '@/services/sale_services'
 import { Alert, AlertTitle } from '../ui/alert'
@@ -36,15 +35,14 @@ import { useProducts } from '@/data'
 
 function TransactionSection() {
   const transactionProduct = useTransactionProduct()
-  const [message, setMessage] = useState<string>("")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [searchInput, setSearchInput] = useState("")
+  const [message, setMessage] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [searchInput, setSearchInput] = useState('')
   const { products } = useProducts(searchTerm)
-  const [isSuccess, setIsSuccess] = useState<boolean>(false)
-  const [isError, setIsError] = useState<boolean>(false)
+  const [isSuccess, setIsSuccess] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
-  const [quantity, setQuantity] = useState<number>(1)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [quantity, setQuantity] = useState(1)
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product)
@@ -59,10 +57,7 @@ function TransactionSection() {
     }
   }
 
-  const calculateTotal = () => {
-    if (!selectedProduct) return 0
-    return selectedProduct.price * quantity
-  }
+  const calculateTotal = () => (selectedProduct ? selectedProduct.price * quantity : 0)
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false)
@@ -72,251 +67,178 @@ function TransactionSection() {
 
   const handleTransaction = async (e: React.FormEvent) => {
     e.preventDefault()
-
     const transactionDetails: TransactionData = {
       productId: String(selectedProduct?.id),
       productName: String(selectedProduct?.productName),
       category: String(selectedProduct?.category),
       totalAmount: calculateTotal(),
-      quantity: quantity,
-      price: Number(selectedProduct?.price)
+      quantity,
+      price: Number(selectedProduct?.price),
     }
-
     await transactionProduct.mutateAsync({ data: transactionDetails }, {
       onSuccess: (data: any) => {
         setIsSuccess(true)
         setMessage(data.message)
         handleCloseDialog()
-
-        setTimeout(() => {
-          setIsSuccess(false)
-          setMessage("")
-        }, 3500)
+        setTimeout(() => { setIsSuccess(false); setMessage('') }, 3500)
       },
       onError: (err: any) => {
-        if (err.response) {
-          setMessage(err.response?.data.error)
-          setIsError(true)
-          console.log(isError)
-        }
-      }
+        if (err.response) setMessage(err.response?.data.error)
+      },
     })
   }
+
+  const inputCls = 'h-10 rounded-lg bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-300 hover:border-zinc-300 focus-visible:border-zinc-900 focus-visible:ring-zinc-900/10 transition-colors'
 
   return (
     <>
       <Activity mode={isSuccess ? 'visible' : 'hidden'}>
-        <Alert className="animate-fade-in-out bg-green-500 w-70 absolute right-2 top-4">
-          <CheckCircle2Icon color='white' />
+        <Alert className="animate-fade-in-out bg-zinc-900 w-72 absolute right-2 top-4 border-0">
+          <CheckCircle2Icon color="white" className="size-4" />
           <AlertTitle>
-            <span className="text-white text-[16px] font-bold">{message}</span>
+            <span className="text-white text-sm font-medium">{message}</span>
           </AlertTitle>
         </Alert>
       </Activity>
-      <Card>
+
+      <Card className="border-zinc-100 shadow-none">
         <CardHeader>
-          <div>
-            <CardTitle>Transactions</CardTitle>
-            <CardDescription>
-              Click on a product to create a transaction
-            </CardDescription>
-          </div>
-          <div className='w-sm'>
-            <form onSubmit={(e: FormEvent) => {
-              e.preventDefault()
-              setSearchTerm(searchInput)
-            }} method="post">
-              <div className='w-md flex flex-row gap-2'>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <CardTitle className="text-base font-semibold text-zinc-900">Transactions</CardTitle>
+              <CardDescription className="text-zinc-400">Click a product to create a transaction</CardDescription>
+            </div>
+            <form
+              onSubmit={(e: FormEvent) => { e.preventDefault(); setSearchTerm(searchInput) }}
+              className="flex items-center gap-2"
+            >
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
                 <Input
-                  className="py-6 px-4"
-                  placeholder="Search your product..."
+                  className={`pl-9 h-9 w-64 ${inputCls}`}
+                  placeholder="Search product..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                 />
-                <Button
-                  type='button'
-                  className="py-6 px-6"
-                >
-                  Search
-                </Button>
               </div>
+              <button
+                type="submit"
+                className="h-9 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+              >
+                Search
+              </button>
             </form>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="relative max-h-150 overflow-hidden">
-            <div className="max-h-150 overflow-y-auto">
-              <Table className="w-full">
-                <TableHeader className="sticky top-0 bg-white z-10">
-                  <TableRow>
-                    {['Image', 'Name', 'Category', 'Price', 'Stock', 'Status'].map(
-                      (item) => (
-                        <TableHead key={item}>{item}</TableHead>
-                      ),
-                    )}
-                  </TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {products.map((product) => {
-                    const status = getProductStatus(product)
-                    return (
-                      <TableRow
-                        key={product.id}
-                        onClick={() => product.stockQuantity > 0 ? handleProductClick(product) : null}
-                        className="cursor-pointer hover:bg-muted/50"
-                      >
-                        <TableCell>
-                          {product.image ? (
-                            <img
-                              className="w-12 h-12 object-cover rounded"
-                              src={
-                                typeof product.image === 'string'
-                                  ? product.image
-                                  : ''
-                              }
-                              alt={product.productName || 'Product image'}
-                            />
-                          ) : (
-                            <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-500 text-xs">
-                              No Image
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>{product.productName}</TableCell>
-                        <TableCell>{product.category}</TableCell>
-                        <TableCell>
-                          &#8369; {formatCurrency(product.price)}
-                        </TableCell>
-                        <TableCell>{product.stockQuantity}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              status === 'In Stock'
-                                ? 'default'
-                                : status === 'Low Stock'
-                                  ? 'secondary'
-                                  : 'destructive'
-                            }
-                          >
-                            {status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                  {products.length == 0 && (
-                    <TableRow>
-                      <TableCell colSpan={9}>
-                        <div className="flex flex-col h-120 items-center justify-center py-10 text-muted-foreground">
-                          <PackageIcon className="mb-3 h-10 w-10 text-gray-400" />
-                          <p className="text-base font-medium">
-                            No products found
-                          </p>
-                          <p className="text-sm">
-                            No products found for transaction "{searchTerm}"
-                          </p>
-                        </div>
+          <div className="max-h-[600px] overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-zinc-100">
+                  {['Image', 'Name', 'Category', 'Price', 'Stock', 'Status'].map((h) => (
+                    <TableHead key={h} className="sticky top-0 bg-white text-xs text-zinc-400 font-medium z-10">{h}</TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products.map((product) => {
+                  const status = getProductStatus(product)
+                  const isOutOfStock = product.stockQuantity === 0
+                  return (
+                    <TableRow
+                      key={product.id}
+                      onClick={() => !isOutOfStock && handleProductClick(product)}
+                      className={`border-zinc-50 transition-colors ${isOutOfStock ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-zinc-50'}`}
+                    >
+                      <TableCell>
+                        {product.image ? (
+                          <img className="w-10 h-10 object-cover rounded-lg border border-zinc-100" src={typeof product.image === 'string' ? product.image : ''} alt={product.productName} />
+                        ) : (
+                          <div className="w-10 h-10 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-400 text-xs">N/A</div>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium text-zinc-900">{product.productName}</TableCell>
+                      <TableCell className="text-zinc-500">{product.category}</TableCell>
+                      <TableCell className="text-zinc-900 font-medium">₱{formatCurrency(product.price)}</TableCell>
+                      <TableCell className="text-zinc-700">{product.stockQuantity}</TableCell>
+                      <TableCell>
+                        <Badge variant={status === 'In Stock' ? 'default' : status === 'Low Stock' ? 'secondary' : 'destructive'} className="text-xs">
+                          {status}
+                        </Badge>
                       </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-          <div>
+                  )
+                })}
+                {products.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-40 text-center">
+                      <div className="flex flex-col items-center gap-2 text-zinc-300">
+                        <PackageIcon className="h-8 w-8" />
+                        <p className="text-sm">No products found</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
 
       {/* Transaction Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-        <DialogContent className="max-w-none sm:max-w-[95vw] w-[50vw]">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Create Transaction</DialogTitle>
-            <DialogDescription>
-              Review product details and enter quantity
-            </DialogDescription>
+            <DialogTitle className="text-lg font-bold text-zinc-900">Create Transaction</DialogTitle>
+            <DialogDescription className="text-zinc-400">Review product details and enter quantity</DialogDescription>
           </DialogHeader>
           {selectedProduct && (
-            <form onSubmit={handleTransaction} className="space-y-4">
+            <form onSubmit={handleTransaction} className="space-y-5">
               <div className="flex gap-6">
-                {/* Left side - Product Image */}
+                {/* Product image */}
                 <div className="shrink-0">
                   {selectedProduct.image ? (
                     <img
-                      className="w-64 h-64 object-cover rounded-lg border"
-                      src={
-                        typeof selectedProduct.image === 'string'
-                          ? selectedProduct.image
-                          : ''
-                      }
-                      alt={selectedProduct.productName || 'Product image'}
+                      className="w-52 h-52 object-cover rounded-xl border border-zinc-100"
+                      src={typeof selectedProduct.image === 'string' ? selectedProduct.image : ''}
+                      alt={selectedProduct.productName}
                     />
                   ) : (
-                    <div className="w-64 h-64 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
-                      No Image Available
+                    <div className="w-52 h-52 bg-zinc-100 rounded-xl flex items-center justify-center text-zinc-400 text-sm">
+                      No Image
                     </div>
                   )}
                 </div>
 
-                {/* Right side - Product Details */}
+                {/* Details */}
                 <div className="flex-1 space-y-4">
                   <div>
-                    <Label className="text-sm font-semibold text-muted-foreground">
-                      Product Name
-                    </Label>
-                    <p className="text-lg font-semibold">
-                      {selectedProduct.productName}
-                    </p>
+                    <p className="text-xs text-zinc-400 uppercase tracking-widest font-medium mb-0.5">Product</p>
+                    <p className="text-lg font-bold text-zinc-900">{selectedProduct.productName}</p>
                   </div>
-
-                  <div>
-                    <Label className="text-sm font-semibold text-muted-foreground">
-                      Category
-                    </Label>
-                    <p className="text-base">{selectedProduct.category}</p>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-semibold text-muted-foreground">
-                      Price
-                    </Label>
-                    <p className="text-lg font-semibold text-primary">
-                      &#8369; {formatCurrency(selectedProduct.price)}
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-semibold text-muted-foreground">
-                      Available Stock
-                    </Label>
-                    <p className="text-base">{selectedProduct?.id && Number(selectedProduct.stockQuantity - quantity)}</p>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-semibold text-muted-foreground">
-                      Status
-                    </Label>
-                    <div className="mt-1">
-                      <Badge
-                        variant={
-                          getProductStatus(selectedProduct) === 'In Stock'
-                            ? 'default'
-                            : getProductStatus(selectedProduct) === 'Low Stock'
-                              ? 'secondary'
-                              : 'destructive'
-                        }
-                      >
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-zinc-400 uppercase tracking-widest font-medium mb-0.5">Category</p>
+                      <p className="text-sm text-zinc-700">{selectedProduct.category}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-400 uppercase tracking-widest font-medium mb-0.5">Price</p>
+                      <p className="text-sm font-semibold text-zinc-900">₱{formatCurrency(selectedProduct.price)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-400 uppercase tracking-widest font-medium mb-0.5">Available</p>
+                      <p className="text-sm text-zinc-700">{Number(selectedProduct.stockQuantity) - quantity}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-400 uppercase tracking-widest font-medium mb-0.5">Status</p>
+                      <Badge variant={getProductStatus(selectedProduct) === 'In Stock' ? 'default' : getProductStatus(selectedProduct) === 'Low Stock' ? 'secondary' : 'destructive'} className="text-xs mt-0.5">
                         {getProductStatus(selectedProduct)}
                       </Badge>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t">
-                    <Label htmlFor="quantity" className="text-sm font-semibold">
-                      Quantity
-                    </Label>
+                  <div className="pt-3 border-t border-zinc-100">
+                    <Label htmlFor="quantity" className="text-xs text-zinc-400 uppercase tracking-widest font-medium">Quantity</Label>
                     <Input
                       id="quantity"
                       type="number"
@@ -324,45 +246,29 @@ function TransactionSection() {
                       max={selectedProduct.stockQuantity}
                       value={quantity}
                       onChange={handleQuantityChange}
-                      className="mt-2"
+                      className={`mt-1.5 ${inputCls}`}
                       required
                     />
-                    {quantity > selectedProduct.stockQuantity && (
-                      <p className="text-sm text-destructive mt-1">
-                        Quantity exceeds available stock
-                      </p>
-                    )}
                   </div>
 
-                  <div className="pt-4 border-t">
-                    <div className="flex justify-between items-center">
-                      <Label className="text-lg font-semibold">Total Amount</Label>
-                      <p className="text-2xl font-bold text-primary">
-                        &#8369; {formatCurrency(calculateTotal())}
-                      </p>
-                    </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-zinc-100">
+                    <p className="text-sm font-medium text-zinc-500">Total Amount</p>
+                    <p className="text-2xl font-bold text-zinc-900">₱{formatCurrency(calculateTotal())}</p>
                   </div>
                 </div>
               </div>
 
               <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCloseDialog}
-                >
+                <button type="button" onClick={handleCloseDialog} className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors">
                   Cancel
-                </Button>
-                <Button
+                </button>
+                <button
                   type="submit"
-                  disabled={
-                    quantity <= 0 ||
-                    quantity > selectedProduct.stockQuantity ||
-                    selectedProduct.stockQuantity === 0
-                  }
+                  disabled={quantity <= 0 || quantity > selectedProduct.stockQuantity}
+                  className="rounded-lg bg-zinc-900 px-5 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   Complete Transaction
-                </Button>
+                </button>
               </DialogFooter>
             </form>
           )}

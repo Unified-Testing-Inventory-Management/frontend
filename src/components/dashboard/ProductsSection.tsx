@@ -59,7 +59,7 @@ import {
   useSetSuccess,
   useSubmitting,
   useSuccess,
-} from '@/states/product-state'
+} from '@/stores/product-state'
 
 export function ProductsSection() {
   const {

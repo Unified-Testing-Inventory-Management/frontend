@@ -1,4 +1,4 @@
-import { AlertCircle, Package, ShoppingCart } from 'lucide-react'
+import { AlertCircle, Package, ShoppingCart, TrendingUp } from 'lucide-react'
 import type { SaleWithDetails, StockAlert } from '@/@types'
 import {
   Card,
@@ -49,30 +49,17 @@ export function OverviewSection({
 }: OverviewSectionProps) {
   const revenueTrendData = (() => {
     const dayToRevenue = new Map<string, number>()
-
     for (const sale of salesWithDetails) {
       const d = new Date(sale.saleDate)
-      const dayKey = Number.isNaN(d.getTime())
-        ? sale.saleDate
-        : d.toISOString().slice(0, 10)
-
+      const dayKey = Number.isNaN(d.getTime()) ? sale.saleDate : d.toISOString().slice(0, 10)
       dayToRevenue.set(dayKey, (dayToRevenue.get(dayKey) ?? 0) + sale.totalAmount)
     }
-
-    const fmt = new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: '2-digit',
-    })
-
+    const fmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit' })
     return Array.from(dayToRevenue.entries())
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([day, revenue]) => {
         const d = new Date(day)
-        return {
-          day,
-          label: Number.isNaN(d.getTime()) ? day : fmt.format(d),
-          revenue: Number(revenue.toFixed(2)),
-        }
+        return { day, label: Number.isNaN(d.getTime()) ? day : fmt.format(d), revenue: Number(revenue.toFixed(2)) }
       })
   })()
 
@@ -80,168 +67,106 @@ export function OverviewSection({
     .slice()
     .sort((a, b) => b.totalAmount - a.totalAmount)
     .slice(0, 10)
-    .map((sale) => ({
-      sale: `#${sale.id}`,
-      revenue: sale.totalAmount,
-    }))
+    .map((sale) => ({ sale: `#${sale.id}`, revenue: sale.totalAmount }))
+
+  const statCards = [
+    {
+      label: 'Total Revenue',
+      value: `₱${formatCurrency(totalRevenue)}`,
+      sub: `From ${totalSales} sales`,
+      icon: <span className="text-base font-bold text-zinc-400">₱</span>,
+    },
+    {
+      label: 'Total Products',
+      value: totalProducts,
+      sub: 'Products in inventory',
+      icon: <Package className="h-4 w-4 text-zinc-400" />,
+    },
+    {
+      label: 'Low Stock',
+      value: lowStockItems,
+      sub: 'Items need restocking',
+      icon: <AlertCircle className="h-4 w-4 text-amber-400" />,
+      valueClass: 'text-amber-600',
+    },
+    {
+      label: 'Out of Stock',
+      value: outOfStockItems,
+      sub: 'Items unavailable',
+      icon: <AlertCircle className="h-4 w-4 text-red-400" />,
+      valueClass: 'text-red-600',
+    },
+  ]
 
   return (
-    <div className="space-y-4">
-      {/* Top Section */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-
-        {/* Total Revenue */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <span className='h-4 w-4 text-muted-foreground'>&#8369;</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              &#8369;
-              {formatCurrency(totalRevenue)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              From {totalSales} sales
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Total Products */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Products
-            </CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalProducts}</div>
-            <p className="text-xs text-muted-foreground">
-              Products in inventory
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Low Stock Items */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Low Stock Items
-            </CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{lowStockItems}</div>
-            <p className="text-xs text-muted-foreground">
-              Items need restocking
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Out of Stock */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
-            <AlertCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">
-              {outOfStockItems}
-            </div>
-            <p className="text-xs text-muted-foreground">Items unavailable</p>
-          </CardContent>
-        </Card>
+    <div className="space-y-5">
+      {/* Stat cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {statCards.map((card) => (
+          <Card key={card.label} className="border-zinc-100 shadow-none">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-zinc-500">{card.label}</CardTitle>
+              {card.icon}
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold text-zinc-900 ${card.valueClass ?? ''}`}>
+                {card.value}
+              </div>
+              <p className="text-xs text-zinc-400 mt-0.5">{card.sub}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Center Section */}
+      {/* Charts */}
       <div className="grid gap-4 md:grid-cols-2">
-        {/*Revenue Trend*/}
-        <Card>
+        <Card className="border-zinc-100 shadow-none">
           <CardHeader>
-            <CardTitle>Revenue Trend</CardTitle>
-            <CardDescription>Revenue by day (from sales)</CardDescription>
+            <CardTitle className="text-base font-semibold text-zinc-900">Revenue Trend</CardTitle>
+            <CardDescription className="text-zinc-400">Daily revenue from sales</CardDescription>
           </CardHeader>
           <CardContent>
             {revenueTrendData.length === 0 ? (
-              <div className="flex h-55 items-center justify-center text-sm text-muted-foreground">
-                No sales yet — revenue trend will appear here.
+              <div className="flex h-52 items-center justify-center">
+                <div className="flex flex-col items-center gap-2 text-zinc-300">
+                  <TrendingUp className="h-8 w-8" />
+                  <p className="text-sm">No sales data yet</p>
+                </div>
               </div>
             ) : (
-              <ChartContainer
-                className="h-55 w-full"
-                config={{
-                  revenue: {
-                    label: 'Revenue',
-                    color: 'hsl(var(--primary))',
-                  },
-                }}
-              >
+              <ChartContainer className="h-52 w-full" config={{ revenue: { label: 'Revenue', color: 'hsl(var(--primary))' } }}>
                 <AreaChart data={revenueTrendData} margin={{ left: 12, right: 12 }}>
                   <ChartGrid vertical={false} />
                   <ChartXAxis dataKey="label" tickMargin={8} />
                   <ChartYAxis tickMargin={8} />
-                  <ChartTooltip
-                    cursor={false}
-                    content={
-                      <ChartTooltipContent
-                        formatter={(value) => {
-                          const n = typeof value === 'number' ? value : Number(value)
-                          return `₱${Number.isNaN(n) ? value : formatCurrency(n)}`
-                        }}
-                      />
-                    }
-                  />
-                  <Area
-                    dataKey="revenue"
-                    type="monotone"
-                    fill="var(--color-revenue)"
-                    fillOpacity={0.25}
-                    stroke="var(--color-revenue)"
-                    strokeWidth={2}
-                  />
+                  <ChartTooltip cursor={false} content={<ChartTooltipContent formatter={(v) => { const n = typeof v === 'number' ? v : Number(v); return `₱${Number.isNaN(n) ? v : formatCurrency(n)}` }} />} />
+                  <Area dataKey="revenue" type="monotone" fill="var(--color-revenue)" fillOpacity={0.1} stroke="var(--color-revenue)" strokeWidth={2} />
                 </AreaChart>
               </ChartContainer>
             )}
           </CardContent>
         </Card>
 
-        {/*Top Sales*/}
-        <Card>
+        <Card className="border-zinc-100 shadow-none">
           <CardHeader>
-            <CardTitle>Top Sales</CardTitle>
-            <CardDescription>Highest-revenue sales</CardDescription>
+            <CardTitle className="text-base font-semibold text-zinc-900">Top Sales</CardTitle>
+            <CardDescription className="text-zinc-400">Highest-revenue transactions</CardDescription>
           </CardHeader>
           <CardContent>
             {topSalesData.length === 0 ? (
-              <div className="flex h-55 items-center justify-center text-sm text-muted-foreground">
-                No sales yet — top sales will appear here.
+              <div className="flex h-52 items-center justify-center">
+                <div className="flex flex-col items-center gap-2 text-zinc-300">
+                  <ShoppingCart className="h-8 w-8" />
+                  <p className="text-sm">No sales data yet</p>
+                </div>
               </div>
             ) : (
-              <ChartContainer
-                className="h-55 w-full"
-                config={{
-                  revenue: {
-                    label: 'Revenue',
-                    color: 'hsl(var(--primary))',
-                  },
-                }}
-              >
+              <ChartContainer className="h-52 w-full" config={{ revenue: { label: 'Revenue', color: 'hsl(var(--primary))' } }}>
                 <BarChart data={topSalesData} margin={{ left: 12, right: 12 }}>
                   <ChartGrid vertical={false} />
                   <ChartXAxis dataKey="sale" tickMargin={8} />
                   <ChartYAxis tickMargin={8} />
-                  <ChartTooltip
-                    cursor={false}
-                    content={
-                      <ChartTooltipContent
-                        formatter={(value) => {
-                          const n = typeof value === 'number' ? value : Number(value)
-                          return `₱${Number.isNaN(n) ? formatCurrency(value) : formatCurrency(n)}`
-                        }}
-                      />
-                    }
-                  />
+                  <ChartTooltip cursor={false} content={<ChartTooltipContent formatter={(v) => { const n = typeof v === 'number' ? v : Number(v); return `₱${Number.isNaN(n) ? formatCurrency(v) : formatCurrency(n)}` }} />} />
                   <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
                 </BarChart>
               </ChartContainer>
@@ -250,88 +175,75 @@ export function OverviewSection({
         </Card>
       </div>
 
-      {/* Bottom Section */}
+      {/* Tables */}
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Recent Sales Table */}
-        <Card>
+        <Card className="border-zinc-100 shadow-none">
           <CardHeader>
-            <CardTitle>Recent Sales</CardTitle>
-            <CardDescription>Latest transactions</CardDescription>
+            <CardTitle className="text-base font-semibold text-zinc-900">Recent Sales</CardTitle>
+            <CardDescription className="text-zinc-400">Latest transactions</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-70 overflow-y-scroll">
+            <div className="h-64 overflow-y-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    {["Product", "User ID", "Amount", "Sale Date"].map((item) => (
-                      <TableHead className="w-50" key={item}>{item}</TableHead>
+                  <TableRow className="border-zinc-100">
+                    {['Product', 'User ID', 'Amount', 'Date'].map((h) => (
+                      <TableHead key={h} className="text-xs text-zinc-400 font-medium">{h}</TableHead>
                     ))}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {
-                    salesWithDetails.length == 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={4} className="h-24 text-center">
-                          <div className="flex flex-col items-center justify-center gap-2 py-4">
-                            <ShoppingCart className="h-8 w-8 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">
-                              No recent sales to display.
-                            </p>
-                          </div>
+                  {salesWithDetails.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-24 text-center">
+                        <div className="flex flex-col items-center gap-2 text-zinc-300">
+                          <ShoppingCart className="h-7 w-7" />
+                          <p className="text-sm">No recent sales</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    salesWithDetails.slice(0, 10).map((sale) => (
+                      <TableRow key={sale.id} className="border-zinc-50">
+                        <TableCell className="text-sm font-medium text-zinc-900">
+                          {sale.saleDetails.map((i) => i.productName).join(', ')}
                         </TableCell>
+                        <TableCell className="text-sm text-zinc-500">{sale.userId}</TableCell>
+                        <TableCell className="text-sm text-zinc-900 font-medium">₱{formatCurrency(sale.totalAmount)}</TableCell>
+                        <TableCell className="text-xs text-zinc-400">{formatDateTime(sale.saleDate)}</TableCell>
                       </TableRow>
-                    ) : (
-                      salesWithDetails.slice(0, 10)
-                        .map((sale) => (
-                          <TableRow key={sale.id}>
-                            <TableCell className="font-medium">
-                              {sale.saleDetails.map((item) => item.productName).join(', ')}
-                            </TableCell>
-                            <TableCell>{sale.userId}</TableCell>
-                            <TableCell>&#8369;{formatCurrency(sale.totalAmount)}</TableCell>
-                            <TableCell>{formatDateTime(sale.saleDate)}</TableCell>
-                          </TableRow>
-                        ))
-                    )
-                  }
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
           </CardContent>
         </Card>
 
-        {/* Stock Alert Table */}
-        <Card>
+        <Card className="border-zinc-100 shadow-none">
           <CardHeader>
-            <CardTitle>Stock Alerts</CardTitle>
-            <CardDescription>Items requiring attention</CardDescription>
+            <CardTitle className="text-base font-semibold text-zinc-900">Stock Alerts</CardTitle>
+            <CardDescription className="text-zinc-400">Items requiring attention</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4 h-70 overflow-auto">
+            <div className="h-64 overflow-y-auto space-y-2">
               {!stockAlerts || stockAlerts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center gap-2 py-4 h-full">
-                  <AlertCircle className="h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    No stock alerts to display.
-                  </p>
+                <div className="flex flex-col items-center justify-center gap-2 h-full text-zinc-300">
+                  <AlertCircle className="h-7 w-7" />
+                  <p className="text-sm">No stock alerts</p>
                 </div>
               ) : (
-                stockAlerts.map((alert,index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">{alert.productName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Current: {alert.current} | Min: {alert.minimum}
+                stockAlerts.map((alert, index) => (
+                  <div key={index} className="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2.5">
+                    <div>
+                      <p className="text-sm font-medium text-zinc-900">{alert.productName}</p>
+                      <p className="text-xs text-zinc-400 mt-0.5">
+                        Current: {alert.current} · Min: {alert.minimum}
                       </p>
                     </div>
                     <Badge
-                      variant={
-                        alert.status === 'Out' ? 'destructive' : 'secondary'
-                      }
+                      variant={alert.status === 'Out' ? 'destructive' : 'secondary'}
+                      className="text-xs"
                     >
                       {alert.status}
                     </Badge>

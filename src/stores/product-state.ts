@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { useShallow } from 'zustand/react/shallow'
 import type { Product, TFilterStatus } from '@/@types'
 
 type productFormData = Omit<
@@ -120,7 +121,7 @@ const exceptionsStore = create<exceptionsTypes>((set) => ({
   setSubmitting: (value) => set(() => ({ submitting: value }))
 }))
 
-export const useProductStore = () => productStore((state) => ({
+export const useProductStore = () => productStore(useShallow((state) => ({
   productData: state.data,
   setProductData: state.setProductData,
   resetProductData: state.resetProductData,
@@ -134,21 +135,21 @@ export const useProductStore = () => productStore((state) => ({
   setProductId: state.setProductId,
   editProductData: state.editProductData,
   setEditProductData: state.setEditProductData
-}))
+})))
 
-export const useFilterProductStore = () => filterProductStore((state) => ({
+export const useFilterProductStore = () => filterProductStore(useShallow((state) => ({
   filterStatus: state.filterStatus,
   setFilterStatus: state.setFilterStatus
-}))
+})))
 
-export const useModalProductStore = () => modalProductStore((state) => ({
+export const useModalProductStore = () => modalProductStore(useShallow((state) => ({
   editProductModalOpen: state.editProductModalOpen,
   setEditProductModalOpen: state.setEditProductModalOpen,
   archiveProductModalOpen: state.archiveModalOpen,
   setArchiveProductModalOpen: state.setArchiveModalOpen,
   addProductDialogOpen: state.addProductDialogOpen,
   setAddProductDialogOpen: state.setAddProductDialogOpen
-}))
+})))
 
 export const useError = () => exceptionsStore((state) => state.error)
 export const useSetError = () => exceptionsStore((state) => state.setError)

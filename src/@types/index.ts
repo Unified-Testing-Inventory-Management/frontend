@@ -13,7 +13,9 @@ export type TRegisterUserData = Omit<User, "id" | "role"> & {
   confirmPassword: string
 }
 
-export type TLoginUserData = Pick<User, "username" | "password">
+export type TLoginUserData = Pick<User, "password"> & {
+  identifier: string
+}
 
 export type TUpdateUserData = Pick<User, "firstName" | "lastName" | "username">
 

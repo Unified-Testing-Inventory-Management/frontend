@@ -23,7 +23,7 @@ function App() {
   const [error, setError] = useState('')
   const [isShowPassword, setIsShowPassword] = useState(false)
   const [formData, setFormData] = useState<TLoginUserData>({
-    username: '',
+    identifier: '',
     password: '',
   })
 
@@ -55,7 +55,7 @@ function App() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const isFormValid = formData.username.length > 0 && formData.password.length > 0
+  const isFormValid = formData.identifier.length > 0 && formData.password.length > 0
 
   return (
     <div className="min-h-screen flex">
@@ -149,16 +149,16 @@ function App() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label
-                htmlFor="username"
+                htmlFor="identifier"
                 className="text-zinc-500 text-xs font-medium uppercase tracking-widest"
               >
                 Username
               </Label>
               <Input
-                id="username"
-                name="username"
+                id="identifier"
+                name="identifier"
                 type="text"
-                value={formData.username}
+                value={formData.identifier}
                 onChange={handleChange}
                 required
                 autoFocus

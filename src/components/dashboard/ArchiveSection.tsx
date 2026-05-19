@@ -110,7 +110,7 @@ export default function ArchiveSection() {
             <Table>
               <TableHeader>
                 <TableRow className="border-zinc-100">
-                  {['ID', 'Product ID', 'Name', 'Category', 'Price', 'Stock', 'Status', 'Barcode', 'Deleted At', 'Actions'].map((h) => (
+                  {['Product ID', 'Name', 'Category', 'Price', 'Stock', 'Status', 'Barcode', 'Deleted At', 'Actions'].map((h) => (
                     <TableHead key={h} className="text-xs text-zinc-400 font-medium">{h}</TableHead>
                   ))}
                 </TableRow>
@@ -120,7 +120,6 @@ export default function ArchiveSection() {
                   const status = getProductStatus(archive)
                   return (
                     <TableRow key={archive.id} className="border-zinc-50">
-                      <TableCell className="text-zinc-500 text-sm">{archive.id}</TableCell>
                       <TableCell className="text-zinc-500 text-sm">{archive.productId}</TableCell>
                       <TableCell className="font-medium text-zinc-900">{archive.productName}</TableCell>
                       <TableCell className="text-zinc-500">{archive.category}</TableCell>
